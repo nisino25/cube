@@ -11,7 +11,11 @@
     "auth": "0.0.9",
     "core-js": "^3.6.5",
     "firebase": "^8.2.3",
-    "vue": "^3.0.0"
+    "moment": "^2.29.1",
+    "vue": "^3.0.0",
+    "vue-css-percentage-circle": "^2.0.0",
+    "vue-ellipse-progress": "^1.3.0",
+    "vue2-circle-progress": "^1.2.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
