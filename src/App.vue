@@ -11,6 +11,39 @@
       </nav>
       
     </div>
+    <div class="graph" >
+      <button>Change the period</button>
+      <div class="actual-graph">
+
+        <table >
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Time</th>
+              <th>AO5</th>
+              <th>AO12</th>
+            </tr>
+          </thead>
+          
+
+          <tbody v-for="(result, i) in results" :key="i" >
+            <tr v-if="i < 5" >
+              <td><strong>{{results.length - i}}. </strong></td>
+              <td>{{results[(results.length - i) -1].outcome}}</td>
+              <td>{{this.AO5Data[i]}}</td>
+              <td>{{this.AO12Data[i]}}</td>
+              <td @click='deleteData((results.length - i) -1)'>X</td>
+            </tr>  
+
+          </tbody>
+
+
+        </table>
+
+
+      </div>
+    </div>
+
 
     <div class="timer">
 
@@ -23,8 +56,10 @@
         <form v-on:submit.prevent="inputTime()" >
           <input type="number" step="0.01" v-model="currentTime"  placeholder="Enter your time">
         </form>
+        <button>delete last one </button>
           
         <br><br>
+        <button @click="practice()"> hey</button>
 
 
 
@@ -79,44 +114,7 @@
     </div>
 
 
-    <div class="graph" >
-      <button>Change the period</button>
-      <div class="actual-graph">
-
-        <table >
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Time</th>
-              <th>AO5</th>
-              <th>AO12</th>
-            </tr>
-          </thead>
-          
-
-          <tbody v-for="(result, i) in results" :key="i" >
-            <tr v-if="i < 5">
-              <td>
-                {{results.length - i}}.
-              </td>
-              <td>
-                {{results[(results.length - i) -1].outcome}}
-              </td>
-              <td>
-                {{getAO(5,(results.length - i) -1)}}
-              </td>
-              <td>
-                {{getAO(12,(results.length - i) -1)}}
-              </td>
-            </tr>
-          </tbody>
-
-
-        </table>
-
-
-      </div>
-    </div>
+    
   </div>
 </body>
 </template>
@@ -148,36 +146,42 @@ export default {
 
       callCount: 0,
       AOLoopCount: null,
+
+      AO5Data: null,
+      AO12Data: null,
       
     }
   },
   methods:{
 
     inputTime(){
+      
       if(this.currentTime >= 100 && this.currentTime <= 1000 ){
         this.currentTime = this.currentTime/10
       }else if(this.currentTime >= 100 && this.currentTime <= 10000 ){
         this.currentTime = this.currentTime/100
       }
 
-      this.results.push({time: Date.now(),outcome: this.currentTime});
+      this.results.push({time: Date.now(),outcome: Number(this.currentTime) });
       this.currentTime = null
+      this.updateAO();
+      // console.log(this.results)
     },
 
     getAO(whichAO,index){
+      this.callCount++;
+      // console.log(index);
+      // console.log(this.callCount)
+      // console.log(`Ao:${whichAO} ind:${index}, count:${this.callCount}`)
       
 
       if(index < whichAO -1){
         return;
       }
-      
-      if(index> 15){
-        console.log('hey')
-        console.log(this.results[index].outcome)
-      }
       // index = index -1
       this.AOLoopCount = 1;
       this.AOSum = this.results[index].outcome
+      // console.log(index)
       // this.AOData = [this.results[index].outcome];
       this.AOData = [this.results[index].outcome];
       
@@ -205,26 +209,91 @@ export default {
         // console.log(index)
         // console.log(this.AOData)
         // console.log(this.results)
-        this.callCount++;
+        // this.callCount++;
       }
       
       return  this.AOAve ;
 
     },
+    practice(){
+      // array.splice(index, 1);
+      console.log(this.results)
+      this.results.splice(13,1);
+      console.log(this.results)
+    },
+    updateAO(){
+      let i = 0
+      this.AO5Data = [];
+      if(this.results.length < 5){
+        return;
+      }
+      while(i < 5){
+        this.AO5Data.push( this.getAO(5,this.results.length - i -1))
+        // console.log(this.results.length - i -1)
+        i++;
+      }
+
+      i = 0
+      this.AO12Data = [];
+      if(this.results.length < 12){
+        return;
+      }
+      while(i < 12){
+        this.AO12Data.push( this.getAO(12,this.results.length - i -1))
+        // console.log(this.results.length - i -1)
+        i++;
+      }
+
+
+
+
+      // console.log(this.AO5Data)
+
+      // console.log('-----------');
+      // // console.log(this.getAO(5, this.results.length  -1))
+      // console.log(this.getAO(5,4))
+      // // console.log(this.results)
+      
+    },
+    deleteData(num){
+      let r= confirm(`Deleting No${num+1}. ${this.results[num].outcome}s...`);
+      if(!r){
+        this.movingRobber = false;
+        return;
+      }
+      console.log(num)
+      this.results.splice(num,1);
+      this.updateAO()
+    }
   },
-  mounted() {
+  created() {
+    console.log('created called.');
     let mountCount =1.5
     while(mountCount < 16){
       this.results.push({time: new moment(),outcome: mountCount});
       mountCount++
     }
     // console.log(this.results)
+    // console.log('hey')
+    this.updateAO();
     
 
 
-    this.reverseResults = this.results.reverse()
-    // console.log('--------')
-    // console.log(this.reverseResults)
+    // this.reverseRe sults = this.results.reverse()
+  },
+  mounted() {
+    // let mountCount =1.5
+    // while(mountCount < 16){
+    //   this.results.push({time: new moment(),outcome: mountCount});
+    //   mountCount++
+    // }
+    // console.log(this.results)
+    
+
+
+    // this.reverseResults = this.results.reverse()
+    // // console.log('--------')
+    // // console.log(this.reverseResults)
 
   },
   computed:{
@@ -232,7 +301,7 @@ export default {
       return this.message.length;
     },
     currentAngle(){
-      console.log(Math.floor(360*this.textLength/144));
+      // console.log(Math.floor(360*this.textLength/144));
       return Math.floor(360*this.textLength/144);
     },  
     rightAngle(){
@@ -257,10 +326,19 @@ export default {
 
 
   },  
-  // results: function(){
-  //   this.reverseResults = this.results.reverse()
+  watch:{
+    // results: function(){
+    //   console.log('jey')
+    //   let watchCount = 0;
+    //   let watchIndex = this.results.length -1
+    //   while(watchCount> 4){
+    //     this.AO5Data.push[this.results[watchIndex].outcome];
+    //     watchCount++;
+    //   }
+    //   console.log(this.AO5Data)
+    // },
+  },
     
-  // },
   name: 'App',
 }
 </script>
@@ -290,23 +368,25 @@ body {
   top: 2.5%;
   height: 10%;
 }
-.timer{
+.graph{
   position: absolute;
   width: 100%;
   top: 12.5%;
   height: 32%;
   /* width: 60em; */
-  border: solid 1px black;
-}
-.graph{
-  position: absolute;
-  width: 100%;
-  top: 48%;
-  height: 50%;
-  /* width: 60em; */
   /* background-color: #304455; */
   border: solid 1px black;
 }
+.timer{
+  position: absolute;
+  width: 100%;
+
+  top: 48%;
+  height: 50%;
+  /* width: 60em; */
+  border: solid 1px black;
+}
+
 
 
 
@@ -361,9 +441,11 @@ body {
 
 
 table{
-  margin-top: 4%;
+  position: absolute;
+  bottom: 4%;
   width:100%;
   text-align: center;
+  font-size: 80%;
 }
 
 table td{
