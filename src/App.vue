@@ -1,5 +1,4 @@
 <template>
-
 <body>
   <div class="wrapper"   v-if="sessionGoal === 25">
 
@@ -7,16 +6,17 @@
       <nav>
         <button class="menu-btn">Timer</button>
         <button class="menu-btn">Stats</button>
-        <button class="menu-btn">Logout</button>
+        <button class="menu-btn">Settings</button>
         
       </nav>
       
     </div>
 
-
     <div class="graph" >
-      <button>Change the period</button>
+      <span  style="position: absolute;right:5%; margin-top: 3%; color: red;" @click="clearTheLocal()">X</span>
       <div class="actual-graph">
+        
+
         <!-- <span>{{displayName}}</span> -->
 
         <table v-if="results.length !== 0">
@@ -26,9 +26,9 @@
               <th>Time</th>
               <th>AO5</th>
               <th>AO12</th>
+              <th>Delete</th>
             </tr>
           </thead>
-          
 
           <tbody v-for="(result, i) in results" :key="i" >
             <tr v-if="i < 5" >
@@ -47,7 +47,6 @@
 
       </div>
     </div>
-
 
     <div class="timer" v-if="!running"  >
       <div class="display">
@@ -77,28 +76,30 @@
 
       </div>
 
-      <table v-if="sessionCount !== 0">
+      <table v-if="totalCount !== 0">
         <thead>
           <tr>
             <th></th>
             <th>Time</th>
             <th>AO5</th>
             <th>AO12</th>
+            <th>Delete</th>
           </tr>
         </thead>
-        <tbody  v-if="sessionCount !== 0" >
+        <tbody  v-if="totalCount !== 0" >
           <tr>
-            <td><strong>Current</strong></td>
+            <td><strong>Last</strong></td>
             <td>{{results[(results.length) -1].outcome}}</td>
             <td>{{AO5Data[0]}}</td>
             <td>{{AO12Data[0]}}</td>
             <td @click='deleteData((results.length) -1)' class="xMark">X</td>
+
           </tr>  
           <tr>
             <td><strong>Best</strong></td>
             <td>{{bestTime}}</td>
-            <td></td>
-            <td></td>
+            <td>{{Math.min(...AO5Data)}}</td>
+            <td>{{Math.min(...AO12Data)}}</td>
             <!-- <td @click='deleteData((results.length) -1)' class="xMark">X</td> -->
           </tr>  
 
@@ -111,13 +112,13 @@
             <!-- 右側の180度分の領域 -->
             <div class="square" style="right:0">
               <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleSession">
-                <div :class="[sessionCount <= sessionGoal ? 'circle-white': 'circle-blue']" class="circle"  style="left:0;"></div>
+                <div :class="[sessionCount < sessionGoal ? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
               </div>
             </div>
             <!-- 左側の180度分の領域 -->
             <div class="square" style="left:0;">
               <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleSession">
-                <div :class="[sessionCount <= sessionGoal ? 'circle-white': 'circle-blue']" class="circle" style="right:0;">
+                <div :class="[sessionCount < sessionGoal ? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
                 </div>
               </div>
             </div>
@@ -129,32 +130,29 @@
             </div>
         </div>
 
+
+
         <div class="total-goal">
-          <!-- 右側の180度分の領域 -->
             <div class="square" style="right:0">
               <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleTotal">
-                <div :class="[totalCount <= totalGoal? 'circle-white': 'circle-blue']" class="circle"  style="left:0;"></div>
+                <div :class="[results.length <= totalGoal? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
               </div>
             </div>
-            <!-- 左側の180度分の領域 -->
+
             <div class="square" style="left:0;">
               <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleTotal">
-                <div :class="[totalCount <= totalGoal? 'circle-white': 'circle-blue']" class="circle" style="right:0;">
+                <div :class="[results.length <= totalGoal? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
                 </div>
               </div>
             </div>
 
 
             <div class="session-goal-text">
-              <span v-if="totalCount <= totalGoal"> {{totalCount}} times</span>
-              <span v-else> {{totalCount}}</span>
+              <span v-if="results.length <= totalGoal"> {{results.length}} </span>
+              <span v-else> {{results.length}}</span>
             </div>
 
         </div>
-
-        <div class="daily-goal"></div>
-        <div class="weekly-goa"></div>
-        <!-- <div class="monthly-goal"></div> -->
         
       </div>
     </div>
@@ -165,6 +163,7 @@
     
 
   </div>
+
 
   <div v-if="sessionGoal === 27">
     <div class="container">
@@ -216,7 +215,6 @@
 
 
   </div>
-
   <div v-if="sessionGoal === 26">
     <div class="container">
       <div class="row justify-content-center">
@@ -281,8 +279,12 @@
 import firebase from "firebase";
 var moment = require('moment'); // require
 moment().format(); 
+var soundStart = new Audio(`/audio/263133__pan14__tone-beep.m4a`);
+// var sound10Seconds = new Audio(`/audio/413690__splatez07__click.m4a`);
+
 
 export default {
+
   data(){
     return{
       results: [],
@@ -307,8 +309,15 @@ export default {
 
       sessionGoal: 25,
       sessionCount: 0,
-      totalGoal: 100,
+      totalGoal: 500,
       totalCount: 0,
+      dailyGoal: 200,
+      dailyCount: 0,
+      weeklyGoal: 1000,
+      weeklyCount: 0,
+      startOfTheDay: new Date().setHours(0,0,0,0),
+      timeStampsList: [],
+      prevMonday: 0,
 
 
       whichInput: 'default',
@@ -333,9 +342,14 @@ export default {
 
 
       bestTime: null,
+      bestAO5: null,
+      bestAO12: null,
       WholeDataOfOutcome: [],
       WholeDataOfFive: [],
       WholeDataOfTwelve: [],
+
+      
+      
 
       form: {
         email: "",
@@ -345,7 +359,50 @@ export default {
 
     }
   },
+
   methods:{
+
+    checkCounts(){
+      let i = 0;
+      this.timeStampsList = []
+      while(i < this.results.length){
+        this.timeStampsList.push(this.results[i].time)
+        if(this.results[i].time > this.startOfTheDay){
+          this.dailyCount++;
+        }
+        if(this.results[i].time > this.prevMonday){
+          this.weeklyCount++;
+        }
+        i++;
+      }
+      // console.log(this.timeStampsList);
+    },
+    getThePreviousMonday(){
+      var date = new Date();
+      var day = date.getDay();
+      this.prevMonday = new Date();
+      if(date.getDay() == 0){
+        this.prevMonday.setDate(date.getDate() - 7);
+      }
+      else{
+        this.prevMonday.setDate(date.getDate() - (day-1));
+      }
+      this.prevMonday.setHours(0,0,0,0),
+      this.prevMonday = new Date(this.prevMonday).setHours(0,0,0,0)
+    },
+    clearTheLocal(){
+      // sound10Seconds.play()
+      let r= confirm('Are you sure you want to do clear the data?');
+      if(!r){
+        return;
+      }
+      this.results = [];
+      this.sessionCount++
+      this.sessionCount= 0
+      localStorage.results = JSON.stringify(this.results);
+      this.totalCount = 0;
+
+    },
     register() {
       firebase
         .auth()
@@ -385,34 +442,6 @@ export default {
       while(this.ShuffleCount < 22){
 
         this.randomNum = Math.random(this.randomNum);
-        // this.randomNum = 0.34
-        // console.log(this.randomNum)
-
-        // switch(this.randomNum){
-        //   case (this.randomNum < 0.166):
-        //     this.currentLetter = 'R'
-        //     break;
-
-        //   case (this.randomNum < 0.333):
-        //     this.currentLetter = 'L'
-        //     break;
-
-        //   case (this.randomNum < 0.464):
-        //     this.currentLetter = 'U'
-        //     break;
-          
-        //   case (this.randomNum < 0.664):
-        //     this.currentLetter = 'D'
-        //     break;
-          
-        //   case (this.randomNum < 0.83):
-        //     this.currentLetter = 'F'
-        //     break;
-          
-        //   case (this.randomNum <= 1):
-        //     this.currentLetter = 'B'
-        //     break;
-        // }
 
         if(this.randomNum < 0.166){
           this.currentLetter = 'R'
@@ -427,8 +456,6 @@ export default {
         }else if(this.randomNum <= 1 ){
           this.currentLetter = 'B'
         }
-
-        // console.log(this.currentLetter)
 
         if(this.currentLetter !== this.lastLetter){
           // console.log(this.currentLetter)
@@ -449,11 +476,8 @@ export default {
 
           this.ShuffleCount++;
         }
-      
-        
         
       }
-      // r,l,u,d,f,b
 
       switch(this.randomNum){
         case (this.randomNum < 0.166):
@@ -480,13 +504,9 @@ export default {
           this.currentLetter = 'B'
           break;
       }
-
       
-
-
-
-
-
+      
+      
     },
 
     inputTime(){
@@ -568,7 +588,7 @@ export default {
       if(this.results.length < 5){
         return;
       }
-      while(i < 5){
+      while(i < this.results.length -5){
         this.AO5Data.push( this.getAO(5,this.results.length - i -1))
         // console.log(this.results.length - i -1)
         i++;
@@ -579,11 +599,14 @@ export default {
       if(this.results.length < 12){
         return;
       }
-      while(i < 12){
+      while(i < this.results.length -12){
         this.AO12Data.push( this.getAO(12,this.results.length - i -1))
         // console.log(this.results.length - i -1)
         i++;
       }
+
+      // console.log(this.AO5Data)
+      // console.log(this.AO12Data)
 
       
     },
@@ -598,8 +621,10 @@ export default {
       this.updateAO()
       this.totalCount = this.results.length
       this.getTheBest();
-      // localStorage.results = this.results;
-      // console.log('updating')
+      localStorage.results = JSON.stringify(this.results);
+      this.sessionCount--;
+      this.dailyCount--;
+      this.weeklyCount--;
     },
 
     getTheBest(){
@@ -629,6 +654,8 @@ export default {
         // this.currentTime = null
 
         this.sessionCount++;
+        this.dailyCount++;
+        this.weeklyCount++
         this.updateAO(); 
         this.totalCount = this.results.length;
         this.getTheBest();
@@ -638,6 +665,7 @@ export default {
 
         return;
       }else{
+        soundStart.play();
         clearInterval(this.started);
         this.stoppedDuration = 0;
         this.timeBegan = null;
@@ -661,7 +689,6 @@ export default {
       }
 
     },
-
     incrementCount(){
       this.totalCount = this.results.length;
       this.sessionCount++;
@@ -686,13 +713,11 @@ export default {
       this.started = setInterval(this.clockRunning, 10);	
       this.running = true;
     },
-
     stop() {
       this.running = false;
       this.timeStopped = new Date();
       clearInterval(this.started);
     },
-
     reset() {
       this.running = false;
       clearInterval(this.started);
@@ -701,7 +726,6 @@ export default {
       this.timeStopped = null;
       this.time = "00:00:00.000";
     },
-
     clockRunning(){
       let currentTime = new Date(),
       timeElapsed = new Date(currentTime - this.timeBegan - this.stoppedDuration),
@@ -717,7 +741,6 @@ export default {
         this.zeroPrefix(ms, 2);
       this.time = Number(this.time)
     },
-
     zeroPrefix(num, digit) {
       var zero = '';
       for(var i = 0; i < digit; i++) {
@@ -729,8 +752,6 @@ export default {
 
 
 
-
-
     downTest(){
       console.log('down')
     },
@@ -738,7 +759,6 @@ export default {
       console.log('up')
     },
 
-    
   },
   created() {
     // console.log('created called.');
@@ -754,20 +774,28 @@ export default {
 
     // this.reverseRe sults = this.results.reverse()
   },
+
   mounted() {
     if (localStorage.results) {
       this.results = JSON.parse(localStorage.results);  
       console.log('getting data')
       this.totalCount = this.results.length
       this.updateAO();
-      // localStorage.results = []
+      this.getTheBest();
+      this.getThePreviousMonday();
+      this.checkCounts();
+      // console.log(this.dailyCount)
+      
+      // console.log(this.startOfTheDay)
+      // console.log(this.weeklyCount)
     }
   },
+
   watch: {
     sessionCount: function() {
-      console.log('hey')
       localStorage.results = JSON.stringify(this.results);
-    }
+    },
+  
   },
   computed:{
     textLength(){
@@ -825,7 +853,7 @@ export default {
 
 
     angleTotal(){
-      return Math.floor(360*this.totalCount.length/this.totalGoal);
+      return Math.floor(360*this.results.length/this.totalGoal);
       // return 0;
     },
     rightAngleTotal(){
@@ -841,7 +869,7 @@ export default {
       }
     },
     stylesTotal(){
-      let width = this.totalCount.length/this.totalGoal*100
+      let width = this.results.length.length/this.totalGoal*100
       return {
         "border": "5px solid red",
         "width": width + '%'
@@ -874,7 +902,7 @@ export default {
         return state.user
       }
     },
-    mutations: {
+  mutations: {
     SET_LOGGED_IN(state, value) {
       state.user.loggedIn = value;
     },
@@ -902,7 +930,6 @@ export default {
 
 </script>
 
-
 <style>
 /* #E8E8E8 grey */
 /* #4fc08d green */
@@ -925,6 +952,9 @@ body {
   width: 100%;
   top: 2.5%;
   height: 10%;
+}
+.menu-nav{
+  font-size: 80%;
 }
 .graph{
   position: absolute;
@@ -951,7 +981,7 @@ body {
 
   bottom: 0;
   height: 35%;
-  background-color: white;
+  /* background-color: white; */
   /* width: 60em; */
   /* border: solid 1px black; */
 }
@@ -1040,42 +1070,43 @@ table td{
   box-sizing: border-box;
 }
 
-.circle-white{
-  border:5px solid #E8E8E8 ;;
+.circle-before{
+  
+  border:5px solid white;
 }
 
 .circle-blue{
-  border:5px solid #304455;
+  border:5px solid #FF4500;
 }
 
 
 
 
 .session-goal{
-  position: relative;
+  /* position: relative; */
   position:absolute;
   width:50px;
   height:50px;
-  left: 0;
+  left: 10%;
+  bottom: 30%;
 
 }
 .session-goal-text{
-  position: relative;
-  position:absolute;
-  width:50px;
-  height:50px;
+  position: absolute;
   left: 0;
-
+  right: 0;
+  text-align: center;
+  top: 30%
 }
 
 
 
 .total-goal{
-  position: relative;
   position:absolute;
   width:50px;
   height:50px;
-  right: 0;
+  right: 10%;
+  bottom: 30%;
 
 }
 .total-goal-text{
