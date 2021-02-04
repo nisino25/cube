@@ -26,6 +26,7 @@
                 <th>Time</th>
                 <th>AO5</th>
                 <th>AO12</th>
+                <th>AO100</th>
                 <th>Delete</th>
               </tr>
             </thead>
@@ -36,6 +37,7 @@
                 <td>{{results[(results.length - i) -1].outcome}}</td>
                 <td>{{AO5Data[i]}}</td>
                 <td>{{AO12Data[i]}}</td>
+                <td>{{AO100Data[i]}}</td>
                 <td @click='deleteData((results.length - i) -1)' class="xMark">X</td>
               </tr>  
 
@@ -83,6 +85,7 @@
               <th>Time</th>
               <th>AO5</th>
               <th>AO12</th>
+              <th>AO100</th>
               <th>Delete</th>
             </tr>
           </thead>
@@ -92,6 +95,7 @@
               <td>{{results[(results.length) -1].outcome}}</td>
               <td>{{AO5Data[0]}}</td>
               <td>{{AO12Data[0]}}</td>
+              <td>{{AO100Data[0]}}</td>
               <td @click='deleteData((results.length) -1)' class="xMark">X</td>
 .
             </tr>  
@@ -100,6 +104,7 @@
               <td>{{bestTime}}</td>
               <td v-if="results.length>= 5">{{Math.min(...AO5Data)}}</td>
               <td v-if="results.length>= 12"> {{Math.min(...AO12Data)}}</td>
+              <td v-if="results.length>= 100">{{Math.min(...AO100Data)}}</td>
               <!-- <td @click='deleteData((results.length) -1)' class="xMark">X</td> -->
             </tr>  
 
@@ -215,7 +220,7 @@
       </div> -->
     </div>
 
-    <div class="menu-timer" v-else>
+    <div class="menu-timer" v-if="menu=== 'timer' && running ">
       <div class="solving-now" @click="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
       </div>
@@ -224,6 +229,11 @@
 
     <div class="menu-stats" v-if="menu==='stats'">
       <div class="stats-table">
+        <div class="index-input">
+          <label for="field1"><span>Showing from  </span><input type="number" class="index-input-field" name="field1" v-model="showingIndex" /></label>
+        </div>
+        
+
 
         <table v-if="results.length !== 0">
           <thead>
@@ -237,7 +247,7 @@
           </thead>
 
           <tbody v-for="(result, i) in results" :key="i" >
-            <tr>
+            <tr v-if="results.length - i <= showingIndex">
               <td><strong>{{results.length - i}}. </strong></td>
               <td>{{results[(results.length - i) -1].outcome}}</td>
               <td>{{AO5Data[i]}}</td>
@@ -412,6 +422,7 @@ export default {
 
       AO5Data: null,
       AO12Data: null,
+      AO100Data: null,
 
       sessionGoal: 25,
       sessionCount: 0,
@@ -460,6 +471,9 @@ export default {
       WholeDataOfOutcome: [],
       WholeDataOfFive: [],
       WholeDataOfTwelve: [],
+
+      showingIndex: null,
+
 
       
       
@@ -621,7 +635,6 @@ export default {
       
       
     },
-
     inputTime(){
       
       if(this.currentTime >= 100 && this.currentTime <= 1000 ){
@@ -640,7 +653,6 @@ export default {
       
       // console.log(this.results)
     },
-
     getAO(whichAO,index){
       this.callCount++;
       // console.log(index);
@@ -698,6 +710,7 @@ export default {
       let i = 0
       this.AO5Data = [];
       this.AO12Data = [];
+      this.AO100Data = [];
       if(this.results.length < 5){
         return;
       }
@@ -717,6 +730,20 @@ export default {
         // console.log(this.results.length - i -1)
         i++;
       }
+      i=0
+
+
+      if(this.results.length < 100){
+        return;
+      }
+      while(i < this.results.length -99){
+        this.AO100Data.push( this.getAO(100,this.results.length - i -1))
+        // console.log(this.results.length - i -1)
+        i++;
+      }
+
+
+
 
       // console.log(this.AO5Data)
       // console.log(this.AO12Data)
@@ -772,6 +799,7 @@ export default {
         this.updateAO(); 
         this.totalCount = this.results.length;
         this.getTheBest();
+        this.algShuffle();
         // localStorage.results = this.results;
         console.log('updating')
 
@@ -897,6 +925,7 @@ export default {
       this.getTheBest();
       this.getThePreviousMonday();
       this.checkCounts();
+      this.showingIndex = this.results.length
       // console.log(this.dailyCount)
       
       // console.log(this.startOfTheDay)
@@ -922,6 +951,7 @@ export default {
   watch: {
     sessionCount: function() {
       localStorage.results = JSON.stringify(this.results);
+      this.showingIndex = this.results.length
     },
     sessionGoal: function(){
       this.sessionGoal = parseInt(this.sessionGoal)
@@ -1391,8 +1421,6 @@ table td{
   height:50px;
   overflow:hidden;
 }
-
-
 .circle{
   position:absolute;
   width: 50px;
@@ -1402,16 +1430,13 @@ table td{
   /* border:5px solid red; */
   box-sizing: border-box;
 }
-
 .circle-before{
   
   border:5px solid white;
 }
-
 .circle-blue{
   border:5px solid #FF4500;
 }
-
 
 
 
@@ -1440,7 +1465,6 @@ table td{
   text-align: center;
   bottom: -30%
 }
-
 
 
 .total-goal{
@@ -1531,7 +1555,7 @@ table td{
 .solving-now{
   position: absolute;
   top: 0%;
-  height: 100%;
+  height: 90%;
   font-size: 6em;
   left: 0;
   right: 0;
@@ -1540,12 +1564,31 @@ table td{
 .solving-now-span{
   top:40%;
   position: absolute;
-  height: 100%;
+  height: 0%;
   left: 0;
   right: 0;
   text-align: center;
 }
 
+
+.index-input{
+  /* top:10%; */
+  /* position: absolute; */
+  margin-top: 10px;
+  height: 0%;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.index-input-field{
+  width: 12.5%;
+}
+
+.menu-stats table{
+  /* position: ; */
+  margin-top:25px;
+}
 
 
 
