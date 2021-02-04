@@ -215,7 +215,33 @@
       </div>
     </div>
 
+    <div class="menu-stats" v-if="menu==='stats'">
+      <div class="stats-table">
 
+        <table v-if="results.length !== 0">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Time</th>
+              <th>AO5</th>
+              <th>AO12</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+
+          <tbody v-for="(result, i) in results" :key="i" >
+            <tr>
+              <td><strong>{{results.length - i}}. </strong></td>
+              <td>{{results[(results.length - i) -1].outcome}}</td>
+              <td>{{AO5Data[i]}}</td>
+              <td>{{AO12Data[i]}}</td>
+              <td @click='deleteData((results.length - i) -1)' class="xMark">X</td>
+            </tr>  
+          </tbody>
+
+        </table>
+      </div>
+    </div>
 
     <div class="menu-setting" v-if="menu==='settings'">
       <div class="settings">
@@ -668,7 +694,7 @@ export default {
       if(this.results.length < 5){
         return;
       }
-      while(i < this.results.length -5){
+      while(i < this.results.length -4){
         this.AO5Data.push( this.getAO(5,this.results.length - i -1))
         // console.log(this.results.length - i -1)
         i++;
@@ -679,7 +705,7 @@ export default {
       if(this.results.length < 12){
         return;
       }
-      while(i < this.results.length -12){
+      while(i < this.results.length -11){
         this.AO12Data.push( this.getAO(12,this.results.length - i -1))
         // console.log(this.results.length - i -1)
         i++;
@@ -1160,6 +1186,17 @@ body {
   bottom: 15%;
   height: 25%;
 }
+.stats-table{
+  position: relative;
+  width: 100%;
+
+  /* top: 48%; */
+  margin-top: 5%;
+  bottom: 20%;
+  /* width: 60em; */
+  border: solid 1px black;
+}
+
 
 .counter-label{
   font-size: 125%;
@@ -1229,6 +1266,14 @@ body {
   /* width: 60em; */
   /* background-color: #304455; */
   border: solid 1px black;
+}
+
+.stats-table table{
+  /* position: absolute; */
+  bottom: 4%;
+  width:100%;
+  text-align: center;
+  font-size: 80%;
 }
 
 
