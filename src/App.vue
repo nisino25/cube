@@ -13,7 +13,7 @@
 
     <div class="menu-timer" v-if="menu=== 'timer' && !running ">
       <div class="graph" >
-        <span  style="position: absolute;right:5%; margin-top: 3%; color: red;" @click="clearTheLocal()">X</span>
+        <span  style="position: absolute;right:5%; margin-top: 1%; color: red;" @click="clearTheLocal()">X</span>
         <div class="actual-graph">
           
 
@@ -93,7 +93,7 @@
               <td>{{AO5Data[0]}}</td>
               <td>{{AO12Data[0]}}</td>
               <td @click='deleteData((results.length) -1)' class="xMark">X</td>
-
+.
             </tr>  
             <tr>
               <td><strong>Best</strong></td>
