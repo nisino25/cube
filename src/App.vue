@@ -11,7 +11,7 @@
       
     </div>
 
-    <div class="menu-timer" v-if="menu=== 'timer' ">
+    <div class="menu-timer" v-if="menu=== 'timer' && !running ">
       <div class="graph" >
         <span  style="position: absolute;right:5%; margin-top: 3%; color: red;" @click="clearTheLocal()">X</span>
         <div class="actual-graph">
@@ -98,8 +98,8 @@
             <tr>
               <td><strong>Best</strong></td>
               <td>{{bestTime}}</td>
-              <td>{{Math.min(...AO5Data)}}</td>
-              <td>{{Math.min(...AO12Data)}}</td>
+              <td v-if="results.length>= 5">{{Math.min(...AO5Data)}}</td>
+              <td v-if="results.length>= 12"> {{Math.min(...AO12Data)}}</td>
               <!-- <td @click='deleteData((results.length) -1)' class="xMark">X</td> -->
             </tr>  
 
@@ -210,10 +210,17 @@
           
         </div>
       </div>
-      <div class="timer" @click="csTimer()" v-else>
+      <!-- <div class="timer" @click="csTimer()" v-else>
         <span class="solving"  >Solving</span>
+      </div> -->
+    </div>
+
+    <div class="menu-timer" v-else>
+      <div class="solving-now" @click="csTimer()" >
+        <span class="solving-now-span"  >Solving</span>
       </div>
     </div>
+    
 
     <div class="menu-stats" v-if="menu==='stats'">
       <div class="stats-table">
@@ -1142,20 +1149,16 @@ body {
   height: 100%;
 
 }
-.menu{
-  position: absolute;
-  width: 100%;
-  top: 2.5%;
-  height: 10%;
-}
 .menu-nav{
-  font-size: 80%;
+  text-align:center;
+  margin-top: 2.5%;
+  font-size: 75%;
 }
 .graph{
   position: absolute;
   width: 100%;
-  top: 12.5%;
-  height: 32%;
+  top: 8.5%;
+  height:28%;
   /* width: 60em; */
   /* background-color: #304455; */
   border: solid 1px black;
@@ -1164,8 +1167,8 @@ body {
   position: absolute;
   width: 100%;
 
-  top: 48%;
-  height: 50%;
+  top: 39%;
+  height: 58%;
   /* width: 60em; */
   border: solid 1px black;
 }
@@ -1331,13 +1334,10 @@ body {
 
 
 
-.menu-nav{
-  text-align:center;
-  margin-top: 5%;
-}
+
 .menu-btn{
   outline:none;
-  padding: 10px;
+  padding: 5px;
   padding-right: 30px;
   padding-left: 30px;
   font-size: 120%;
@@ -1528,10 +1528,19 @@ table td{
   /* padding-bottom: 5%; */
 }
 
-.solving{
+.solving-now{
   position: absolute;
-  margin-top: 30%;
+  top: 0%;
+  height: 100%;
   font-size: 6em;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+.solving-now-span{
+  top:40%;
+  position: absolute;
+  height: 100%;
   left: 0;
   right: 0;
   text-align: center;
