@@ -1,273 +1,346 @@
 <template>
 <body>
-  <div class="wrapper"   v-if="sessionGoal === 25">
+  <div class="wrapper">
 
     <div class="menu-nav">
       <nav>
-        <button class="menu-btn">Timer</button>
-        <button class="menu-btn">Stats</button>
-        <button class="menu-btn">Settings</button>
-        
+        <button class="menu-btn" @click="menu='timer'">Timer</button>
+        <button class="menu-btn" @click="menu='stats'">Stats</button>
+        <button class="menu-btn" @click="menu='settings'">Settings</button>
       </nav>
       
     </div>
 
-    <div class="graph" >
-      <span  style="position: absolute;right:5%; margin-top: 3%; color: red;" @click="clearTheLocal()">X</span>
-      <div class="actual-graph">
-        
+    <div class="menu-timer" v-if="menu=== 'timer' ">
+      <div class="graph" >
+        <span  style="position: absolute;right:5%; margin-top: 3%; color: red;" @click="clearTheLocal()">X</span>
+        <div class="actual-graph">
+          
 
-        <!-- <span>{{displayName}}</span> -->
+          <!-- <span>{{displayName}}</span> -->
 
-        <table v-if="results.length !== 0">
+          <table v-if="results.length !== 0">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Time</th>
+                <th>AO5</th>
+                <th>AO12</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+
+            <tbody v-for="(result, i) in results" :key="i" >
+              <tr v-if="i < 5" >
+                <td><strong>{{results.length - i}}. </strong></td>
+                <td>{{results[(results.length - i) -1].outcome}}</td>
+                <td>{{AO5Data[i]}}</td>
+                <td>{{AO12Data[i]}}</td>
+                <td @click='deleteData((results.length - i) -1)' class="xMark">X</td>
+              </tr>  
+
+            </tbody>
+
+
+          </table>
+
+
+        </div>
+      </div>
+
+      <div class="timer" v-if="!running"  >
+        <div class="display">
+          <!-- <a class="button-one" title="Relevant Title" href="#">Click Me</a><a class="button-two" title="Relevant Title" href="#">No Click Me</a> -->
+          <div class='timer-buttons' >
+            <!-- <button class="timer-menu" @click="whichInput = 'default'">Default</button>
+            <button class="timer-menu" @click="whichInput = 'typing'">Typing</button> -->
+          </div>
+          <div class="random-algorithm" style="textAlgin:center">
+            <span>{{randomAlg}}</span>
+            <button class="shuffle" @click="algShuffle()">Shuffle</button>
+          </div>
+
+          <div v-if="whichInput === 'typing'">
+            <form v-on:submit.prevent="inputTime()" >
+              <input type="number" step="0.01" v-model="currentTime"  placeholder="Enter your time">
+            </form>
+          </div>
+          <div v-else>
+            <div id="clock">
+              <span class="actual-timer" @click="csTimer()"   v-if="!running" >{{ time }}</span>
+              
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <table v-if="totalCount !== 0">
           <thead>
             <tr>
-              <th>No.</th>
+              <th></th>
               <th>Time</th>
               <th>AO5</th>
               <th>AO12</th>
               <th>Delete</th>
             </tr>
           </thead>
+          <tbody  v-if="totalCount !== 0" >
+            <tr>
+              <td><strong>Last</strong></td>
+              <td>{{results[(results.length) -1].outcome}}</td>
+              <td>{{AO5Data[0]}}</td>
+              <td>{{AO12Data[0]}}</td>
+              <td @click='deleteData((results.length) -1)' class="xMark">X</td>
 
-          <tbody v-for="(result, i) in results" :key="i" >
-            <tr v-if="i < 5" >
-              <td><strong>{{results.length - i}}. </strong></td>
-              <td>{{results[(results.length - i) -1].outcome}}</td>
-              <td>{{AO5Data[i]}}</td>
-              <td>{{AO12Data[i]}}</td>
-              <td @click='deleteData((results.length - i) -1)' class="xMark">X</td>
+            </tr>  
+            <tr>
+              <td><strong>Best</strong></td>
+              <td>{{bestTime}}</td>
+              <td>{{Math.min(...AO5Data)}}</td>
+              <td>{{Math.min(...AO12Data)}}</td>
+              <!-- <td @click='deleteData((results.length) -1)' class="xMark">X</td> -->
             </tr>  
 
           </tbody>
-
-
         </table>
 
 
-      </div>
-    </div>
+        <div class="stats">
 
-    <div class="timer" v-if="!running"  >
-      <div class="display">
-        <!-- <a class="button-one" title="Relevant Title" href="#">Click Me</a><a class="button-two" title="Relevant Title" href="#">No Click Me</a> -->
-        <div class='timer-buttons' >
-          <!-- <button class="timer-menu" @click="whichInput = 'default'">Default</button>
-          <button class="timer-menu" @click="whichInput = 'typing'">Typing</button> -->
-        </div>
-        <div class="random-algorithm" style="textAlgin:center">
-          <span>{{randomAlg}}</span>
-          <button class="shuffle" @click="algShuffle()">Shuffle</button>
-        </div>
 
-        <div v-if="whichInput === 'typing'">
-          <form v-on:submit.prevent="inputTime()" >
-            <input type="number" step="0.01" v-model="currentTime"  placeholder="Enter your time">
-          </form>
-        </div>
-        <div v-else>
-          <div id="clock">
-            <span class="actual-timer" @click="csTimer()"   v-if="!running" >{{ time }}</span>
-            
+          <hr class="counter-left">
+          <span class="counter-label">Counter</span>
+          <hr class="counter-right">
 
+          <div  class="session-goal">
+              <!-- 右側の180度分の領域 -->
+              <div class="square" style="right:0">
+                <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleSession">
+                  <div :class="[sessionCount < sessionGoal ? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
+                </div>
+              </div>
+              <!-- 左側の180度分の領域 -->
+              <div class="square" style="left:0;">
+                <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleSession">
+                  <div :class="[sessionCount < sessionGoal ? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="session-goal-text">
+                <span v-if="sessionCount <= sessionGoal"> {{ sessionCount}}</span>
+                <span v-else> {{ sessionCount}}</span>
+              </div>
+
+              <div class="goal-label">Session</div>
           </div>
 
-        </div>
-
-      </div>
-
-      <table v-if="totalCount !== 0">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Time</th>
-            <th>AO5</th>
-            <th>AO12</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-        <tbody  v-if="totalCount !== 0" >
-          <tr>
-            <td><strong>Last</strong></td>
-            <td>{{results[(results.length) -1].outcome}}</td>
-            <td>{{AO5Data[0]}}</td>
-            <td>{{AO12Data[0]}}</td>
-            <td @click='deleteData((results.length) -1)' class="xMark">X</td>
-
-          </tr>  
-          <tr>
-            <td><strong>Best</strong></td>
-            <td>{{bestTime}}</td>
-            <td>{{Math.min(...AO5Data)}}</td>
-            <td>{{Math.min(...AO12Data)}}</td>
-            <!-- <td @click='deleteData((results.length) -1)' class="xMark">X</td> -->
-          </tr>  
-
-        </tbody>
-      </table>
-
-
-      <div class="stats">
-        <div  class="session-goal">
-            <!-- 右側の180度分の領域 -->
-            <div class="square" style="right:0">
-              <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleSession">
-                <div :class="[sessionCount < sessionGoal ? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
-              </div>
-            </div>
-            <!-- 左側の180度分の領域 -->
-            <div class="square" style="left:0;">
-              <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleSession">
-                <div :class="[sessionCount < sessionGoal ? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+          <div class="daily-goal">
+              <div class="square" style="right:0">
+                <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleDaily">
+                  <div :class="[dailyCount <= dailyGoal ? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
                 </div>
               </div>
-            </div>
 
-
-            <div class="session-goal-text">
-              <span v-if="sessionCount <= sessionGoal"> {{ sessionCount}}</span>
-              <span v-else> {{ sessionCount}}</span>
-            </div>
-        </div>
-
-
-
-        <div class="total-goal">
-            <div class="square" style="right:0">
-              <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleTotal">
-                <div :class="[results.length <= totalGoal? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
-              </div>
-            </div>
-
-            <div class="square" style="left:0;">
-              <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleTotal">
-                <div :class="[results.length <= totalGoal? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+              <div class="square" style="left:0;">
+                <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleDaily">
+                  <div :class="[dailyCount <= dailyGoal? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+                  </div>
                 </div>
               </div>
-            </div>
 
 
-            <div class="session-goal-text">
-              <span v-if="results.length <= totalGoal"> {{results.length}} </span>
-              <span v-else> {{results.length}}</span>
-            </div>
+              <div class="session-goal-text">
+                <span v-if="dailyCount <= dailyGoal"> {{dailyCount}} </span>
+                <span v-else> {{dailyCount}}</span>
+              </div>
 
+              <div class="goal-label">Daily</div>
+          </div>
+
+          <div class="weekly-goal">
+              <div class="square" style="right:0">
+                <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleWeekly">
+                  <div :class="[weeklyCount <= weeklyGoal ? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
+                </div>
+              </div>
+
+              <div class="square" style="left:0;">
+                <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleWeekly">
+                  <div :class="[weeklyCount <= weeklyGoal? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="session-goal-text">
+                <span v-if="weeklyCount <= weeklyGoal"> {{weeklyCount}} </span>
+                <span v-else> {{weeklyCount}}</span>
+              </div>
+
+              <div class="goal-label">Weekly</div>
+          </div>
+
+          <div class="total-goal">
+              <div class="square" style="right:0">
+                <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleTotal">
+                  <div :class="[results.length <= totalGoal? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
+                </div>
+              </div>
+
+              <div class="square" style="left:0;">
+                <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleTotal">
+                  <div :class="[results.length <= totalGoal? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="session-goal-text">
+                <span v-if="results.length <= totalGoal"> {{results.length}} </span>
+                <span v-else> {{results.length}}</span>
+              </div>
+
+              <div class="goal-label">Total</div>
+
+          </div>
+          
         </div>
-        
+      </div>
+      <div class="timer" @click="csTimer()" v-else>
+        <span class="solving"  >Solving</span>
       </div>
     </div>
-    <div class="timer" @click="csTimer()" v-else>
-      <span class="solving"  >Solving</span>
+
+
+
+    <div class="menu-setting" v-if="menu==='settings'">
+      <div class="settings">
+        <div class="form-style-2">
+          <div class="form-style-2-heading">Change your goals</div>
+          <form action="" method="post">
+            <label for="field1"><span>Session Goal <span class="required">*</span></span><input type="number" class="input-field" name="field1" v-model="sessionGoal" /></label>
+            <label for="field1"><span>Daily Goal <span class="required">*</span></span><input type="number" class="input-field" name="field1" v-model="dailyGoal" /></label>
+            <label for="field1"><span>Weekly Goal <span class="required">*</span></span><input type="number" class="input-field" name="field1" v-model="weeklyGoal" /></label>
+            <label for="field1"><span>Total Goal<span class="required">*</span></span><input type="number" class="input-field" name="field1" v-model="totalGoal" /></label>
+
+            <!-- <label><span > </span><input class="menu-btn" style="marginTop:5%"  type="submit" value="Update" /></label> -->
+          </form>
+        </div>
+      </div>
+      <div class="stats-settings">
+
+
+          <hr class="counter-left-settings">
+          <span class="counter-label-settings">Counter</span>
+          <hr class="counter-right-settings">
+            <div  class="session-goal">
+                <!-- 右側の180度分の領域 -->
+                <div class="square" style="right:0">
+                  <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleSession">
+                    <div :class="[sessionCount < sessionGoal ? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
+                  </div>
+                </div>
+                <!-- 左側の180度分の領域 -->
+                <div class="square" style="left:0;">
+                  <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleSession">
+                    <div :class="[sessionCount < sessionGoal ? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+                    </div>
+                  </div>
+                </div>
+
+
+                <div class="session-goal-text">
+                  <span v-if="sessionCount <= sessionGoal"> {{ sessionCount}}</span>
+                  <span v-else> {{ sessionCount}}</span>
+                </div>
+
+                <div class="goal-label">Session</div>
+            </div>
+
+            <div class="daily-goal">
+                <div class="square" style="right:0">
+                  <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleDaily">
+                    <div :class="[dailyCount <= dailyGoal ? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
+                  </div>
+                </div>
+
+                <div class="square" style="left:0;">
+                  <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleDaily">
+                    <div :class="[dailyCount <= dailyGoal? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+                    </div>
+                  </div>
+                </div>
+
+
+                <div class="session-goal-text">
+                  <span v-if="dailyCount <= dailyGoal"> {{dailyCount}} </span>
+                  <span v-else> {{dailyCount}}</span>
+                </div>
+
+                <div class="goal-label">Daily</div>
+            </div>
+
+            <div class="weekly-goal">
+                <div class="square" style="right:0">
+                  <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleWeekly">
+                    <div :class="[weeklyCount <= weeklyGoal ? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
+                  </div>
+                </div>
+
+                <div class="square" style="left:0;">
+                  <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleWeekly">
+                    <div :class="[weeklyCount <= weeklyGoal? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+                    </div>
+                  </div>
+                </div>
+
+
+                <div class="session-goal-text">
+                  <span v-if="weeklyCount <= weeklyGoal"> {{weeklyCount}} </span>
+                  <span v-else> {{weeklyCount}}</span>
+                </div>
+
+                <div class="goal-label">Weekly</div>
+            </div>
+
+            <div class="total-goal">
+                <div class="square" style="right:0">
+                  <div class="square" style="right:100%;transform-origin: 100% 50%;" :style="rightAngleTotal">
+                    <div :class="[results.length <= totalGoal? 'circle-before': 'circle-blue']" class="circle"  style="left:0;"></div>
+                  </div>
+                </div>
+
+                <div class="square" style="left:0;">
+                  <div class="square" style="left:100%;transform-origin: 0% 50%;" :style="leftAngleTotal">
+                    <div :class="[results.length <= totalGoal? 'circle-before': 'circle-blue']" class="circle" style="right:0;">
+                    </div>
+                  </div>
+                </div>
+
+
+                <div class="session-goal-text">
+                  <span v-if="results.length <= totalGoal"> {{results.length}} </span>
+                  <span v-else> {{results.length}}</span>
+                </div>
+
+                <div class="goal-label">Total</div>
+
+            </div>
+
+          
+          
+          
+        </div>
     </div>
+
 
     
 
-  </div>
-
-
-  <div v-if="sessionGoal === 27">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-md-8">
-          <div class="card">
-            <div class="card-header">Register</div>
-            <div class="card-body">
-              <div v-if="error" class="alert alert-danger">{{error}}</div>
-              <form action="#" @submit.prevent="register">
-
-                <div class="form-group row">
-                  <label for="name" class="col-md-4 col-form-label text-md-right">Name</label>
-
-                  <div class="col-md-6">
-                    <input id="name" type="name" class="form-control" name="name" value required autofocus v-model="form.name"/>
-                  </div>
-                </div>
-
-                <div class="form-group row">
-                  <label for="email" class="col-md-4 col-form-label text-md-right">Email</label>
-
-                  <div class="col-md-6">
-                    <input id="email" type="email" class="form-control" name="email" value required autofocus v-model="form.email" />
-                  </div>
-                </div>
-
-                <div class="form-group row">
-                  <label for="password" class="col-md-4 col-form-label text-md-right">Password</label>
-
-                  <div class="col-md-6">
-                    <input id="password" type="password" class="form-control" name="password" required v-model="form.password" />
-                  </div>
-                </div>
-
-                <div class="form-group row mb-0">
-                  <div class="col-md-8 offset-md-4">
-                    <button type="submit" class="btn btn-primary">Register</button>
-                  </div>
-                </div>
-              </form>
-
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-  </div>
-  <div v-if="sessionGoal === 26">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-md-8">
-          <div class="card">
-            <div class="card-header">Login</div>
-            <div class="card-body">
-              <div v-if="error" class="alert alert-danger">{{error}}</div>
-              <form action="#" @submit.prevent="login">
-                <div class="form-group row">
-                  <label for="email" class="col-md-4 col-form-label text-md-right">Email</label>
-
-                  <div class="col-md-6">
-                    <input
-                      id="email"
-                      type="email"
-                      class="form-control"
-                      name="email"
-                      value
-                      required
-                      autofocus
-                      v-model="form.email"
-                    />
-                  </div>
-                </div>
-
-                <div class="form-group row">
-                  <label for="password" class="col-md-4 col-form-label text-md-right">Password</label>
-
-                  <div class="col-md-6">
-                    <input
-                      id="password"
-                      type="password"
-                      class="form-control"
-                      name="password"
-                      required
-                      v-model="form.password"
-                    />
-                  </div>
-                </div>
-
-                <div class="form-group row mb-0">
-                  <div class="col-md-8 offset-md-4">
-                    <button type="submit" class="btn btn-primary">Login</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    
 
   </div>
 
@@ -309,11 +382,11 @@ export default {
 
       sessionGoal: 25,
       sessionCount: 0,
-      totalGoal: 500,
+      totalGoal: 1000,
       totalCount: 0,
-      dailyGoal: 200,
+      dailyGoal: 150,
       dailyCount: 0,
-      weeklyGoal: 1000,
+      weeklyGoal: 500,
       weeklyCount: 0,
       startOfTheDay: new Date().setHours(0,0,0,0),
       timeStampsList: [],
@@ -321,6 +394,13 @@ export default {
 
 
       whichInput: 'default',
+      menu: 'timer',
+      goalData: {
+        session: null,
+        daily: null,
+        weekly: null,
+        total: null,
+      },
       
 
       time: '0.000',
@@ -789,12 +869,48 @@ export default {
       // console.log(this.startOfTheDay)
       // console.log(this.weeklyCount)
     }
+    if(localStorage.goalData){
+      this.goalData = JSON.parse(localStorage.goalData);
+      if(this.goalData.session > 0){
+        this.sessionGoal = this.goalData.session
+      }
+      if(this.goalData.daily > 0){
+        this.dailyGoal = this.goalData.daily
+      }
+      if(this.goalData.weekly > 0){
+        this.weeklyGoal = this.goalData.weekly
+      }
+      if(this.goalData.total > 0){
+        this.totalGoal = this.goalData.total
+      }
+    }
   },
 
   watch: {
     sessionCount: function() {
       localStorage.results = JSON.stringify(this.results);
     },
+    sessionGoal: function(){
+      this.sessionGoal = parseInt(this.sessionGoal)
+      this.goalData.session = this.sessionGoal
+      localStorage.goalData = JSON.stringify(this.goalData);
+    },
+    dailyGoal: function(){
+      this.dailyGoal = parseInt(this.dailyGoal)
+      this.goalData.daily = this.dailyGoal
+      localStorage.goalData = JSON.stringify(this.goalData);
+    },
+    weeklyGoal: function(){
+      this.weeklyGoal = parseInt(this.weeklyGoal)
+      this.goalData.weekly = this.weeklyGoal
+      localStorage.goalData = JSON.stringify(this.goalData);
+    },
+    totalGoal: function(){
+      this.totalGoal = parseInt(this.totalGoal)
+      this.goalData.total = this.totalGoal
+      localStorage.goalData = JSON.stringify(this.goalData);
+    }
+
   
   },
   computed:{
@@ -875,6 +991,59 @@ export default {
         "width": width + '%'
       }
     },
+
+    angleDaily(){
+      return Math.floor(360*this.dailyCount/this.dailyGoal);
+      // return 0;
+    },
+    rightAngleDaily(){
+      let angle = Math.min(this.angleDaily, 180);
+      return {
+        "transform": "rotate(" + angle + "deg)",
+      }
+    },
+    leftAngleDaily(){
+      let angle = Math.min(Math.max(this.angleDaily-180, 0),180);
+      return {
+        "transform": "rotate(" + angle + "deg)",
+      }
+    },
+    stylesDaily(){
+      let width = this.dailyCount/this.dailyGoal*100
+      return {
+        "border": "5px solid red",
+        "width": width + '%'
+      }
+    },
+
+
+
+
+    angleWeekly(){
+      return Math.floor(360*this.weeklyCount/this.weeklyGoal);
+      // return 0;
+    },
+    rightAngleWeekly(){
+      let angle = Math.min(this.angleWeekly, 180);
+      return {
+        "transform": "rotate(" + angle + "deg)",
+      }
+    },
+    leftAngleWeekly(){
+      let angle = Math.min(Math.max(this.angleWeekly-180, 0),180);
+      return {
+        "transform": "rotate(" + angle + "deg)",
+      }
+    },
+    stylesWeekly(){
+      let width = this.weeklyCount/this.weeklyGoal*100
+      return {
+        "border": "5px solid red",
+        "width": width + '%'
+      }
+    },
+
+    
 
 
 
@@ -974,18 +1143,144 @@ body {
   /* width: 60em; */
   border: solid 1px black;
 }
-
 .stats{
   position: absolute;
   width: 100%;
 
   bottom: 0;
-  height: 35%;
+  height: 25%;
   /* background-color: white; */
   /* width: 60em; */
   /* border: solid 1px black; */
 }
+.stats-settings{
+  position: absolute;
+  width: 100%;
 
+  bottom: 15%;
+  height: 25%;
+}
+
+.counter-label{
+  font-size: 125%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  top: -30%
+}
+.counter-right{
+  width: 35%;
+  background-color:black;
+  height: 1px;
+  border: none;
+  right: 3%;
+  top: -24%;
+  text-decoration:none;
+  position: absolute;
+}
+.counter-left{
+  width: 35%;
+  background-color:black;
+  height: 1px;
+  border: none;
+  left: 3%;
+  top: -24%;
+  text-decoration:none;
+  position: absolute;
+}
+
+
+
+.counter-label-settings{
+  font-size: 125%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  top: -10%
+}
+.counter-right-settings{
+  width: 35%;
+  background-color:black;
+  height: 1px;
+  border: none;
+  right: 3%;
+  top: -7%;
+  text-decoration:none;
+  position: absolute;
+}
+.counter-left-settings{
+  width: 35%;
+  background-color:black;
+  height: 1px;
+  border: none;
+  left: 3%;
+  top: -7%;
+  text-decoration:none;
+  position: absolute;
+}
+
+.settings{
+  position: absolute;
+  width: 100%;
+  top: 12.5%;
+  height: 40%;
+  /* width: 60em; */
+  /* background-color: #304455; */
+  border: solid 1px black;
+}
+
+
+
+
+
+
+.form-style-2{
+	max-width: 500px;
+	padding: 20px 12px 10px 20px;
+  font-size: 100%;
+	/* font: 13px Arial, Helvetica, sans-serif; */
+}
+.form-style-2-heading{
+	font-weight: bold;
+	font-style: italic;
+	border-bottom: 2px solid #ddd;
+	margin-bottom: 20px;
+	font-size: 120%;
+	padding-bottom: 3px;
+}
+.form-style-2 label{
+	display: block;
+	margin: 0px 0px 15px 0px;
+}
+.form-style-2 label > span{
+	width: 100px;
+	font-weight: bold;
+	float: left;
+	padding-top: 8px;
+	padding-right: 5px;
+}
+.form-style-2 span.required{
+	color:red;
+} s
+.form-style-2 input.input-field, 
+.form-style-2 .tel-number-field, 
+.form-style-2 .textarea-field, 
+ .form-style-2 .select-field{
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	border: 1px solid #C2C2C2;
+	box-shadow: 1px 1px 4px #EBEBEB;
+	-moz-box-shadow: 1px 1px 4px #EBEBEB;
+	-webkit-box-shadow: 1px 1px 4px #EBEBEB;
+	border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	padding: 7px;
+	outline: none;
+}
 
 
 
@@ -995,7 +1290,6 @@ body {
   text-align:center;
   margin-top: 5%;
 }
-
 .menu-btn{
   outline:none;
   padding: 10px;
@@ -1006,7 +1300,6 @@ body {
   color:#E8E8E8 ;
   border: solid 1px grey;
 }
-
 .timer-menu{
   outline:none;
   padding: 8px;
@@ -1017,13 +1310,11 @@ body {
   color:#E8E8E8 ;
   border: solid 1px grey;
 }
-
 .timer-buttons{
   text-align: center;
   margin-top: 3%;
   margin-bottom: 3%;
 }
-
 
 
 .graph table{
@@ -1033,7 +1324,6 @@ body {
   text-align: center;
   font-size: 80%;
 }
-
 .timer table{
   position: absolute;
   top: 45%;
@@ -1041,11 +1331,9 @@ body {
   text-align: center;
   font-size: 80%;
 }
-
 table td{
   border: 1px solid grey;
 }
-
 .xMark{
   color: #cc0000
 }
@@ -1087,16 +1375,25 @@ table td{
   position:absolute;
   width:50px;
   height:50px;
-  left: 10%;
+  left: 5%;
   bottom: 30%;
 
 }
 .session-goal-text{
+  font-size: 85%;
   position: absolute;
   left: 0;
   right: 0;
   text-align: center;
   top: 30%
+}
+.goal-label{
+  font-size: 75%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  bottom: -30%
 }
 
 
@@ -1105,17 +1402,23 @@ table td{
   position:absolute;
   width:50px;
   height:50px;
-  right: 10%;
+  right: 5%;
   bottom: 30%;
 
 }
-.total-goal-text{
-  position: relative;
+.daily-goal{
   position:absolute;
   width:50px;
   height:50px;
-  right: 0;
-
+  left: 30%;
+  bottom: 30%;
+}
+.weekly-goal{
+  position:absolute;
+  width:50px;
+  height:50px;
+  right: 30%;
+  bottom: 30%;
 }
 
 
@@ -1138,6 +1441,16 @@ table td{
 .shuffle{
   position: absolute;
   right:5%;
+
+  outline:none;
+  padding: 5px;
+  padding-right: 20px;
+  padding-left: 20px;
+  font-size: 50%;
+
+  background-color: #304455;
+  color:#E8E8E8 ;
+  border: solid 1px grey;
 }
 
 
