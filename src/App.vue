@@ -6,7 +6,8 @@
       <nav>
         <button class="menu-btn" @click="menu='timer'">Timer</button>
         <button class="menu-btn" @click="menu='stats'">Stats</button>
-        <button class="menu-btn" @click="menu='settings'">Settings</button>
+        <!-- <button class="menu-btn" @click="menu='settings'">Settings</button> -->
+        <button class="menu-btn" @click="addRandomData()">Settings</button>
       </nav>
       
     </div>
@@ -17,9 +18,7 @@
         <div class="actual-graph">
           
 
-          <!-- <span>{{displayName}}</span> -->
-
-          <table v-if="results.length !== 0">
+           <table v-if="results.length !== 0"> 
             <thead>
               <tr>
                 <th>No.</th>
@@ -31,7 +30,7 @@
               </tr>
             </thead>
 
-            <tbody v-for="(result, i) in results" :key="i" >
+            <!-- <tbody v-for="(result, i) in results" :key="i" >
               <tr v-if="i < 5" >
                 <td><strong>{{results.length - i}}. </strong></td>
                 <td>{{results[(results.length - i) -1].outcome}}</td>
@@ -41,10 +40,75 @@
                 <td @click='deleteData((results.length - i) -1)' class="xMark">X</td>
               </tr>  
 
-            </tbody>
+            </tbody> -->
+            <tr >
+              <td><strong>{{results.length - 0}}. </strong></td>
+              <td>{{results[(results.length - 0) -1].outcome}}</td>
+              <!-- <td>{{results[0].outcome}}</td> -->
+              <td v-if="results.length>=5">{{AO5Data[results.length - 1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=12">{{AO12Data[results.length - 1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=100">{{AO100Data[results.length - 1]}}</td>
+              <td v-else></td>
+              <td @click='deleteData((results.length - 0) -1)' class="xMark">X</td>
+            </tr>  
+
+            <tr v-if="results.length >= 2">
+              <td><strong>{{results.length - 1}}. </strong></td>
+              <td>{{results[(results.length - 1) -1].outcome}}</td>
+              <!-- <td>{{results[0].outcome}}</td> -->
+              <td v-if="results.length>=5">{{AO5Data[results.length - 2]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=12">{{AO12Data[results.length - 2]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=100">{{AO100Data[results.length - 2]}}</td>
+              <td v-else></td>
+              <td @click='deleteData((results.length - 1) -1)' class="xMark">X</td>
+            </tr> 
+
+            <tr v-if="results.length >= 3">
+              <td><strong>{{results.length - 2}}. </strong></td>
+              <td>{{results[(results.length - 2) -1].outcome}}</td>
+              <!-- <td>{{results[0].outcome}}</td> -->
+              <td v-if="results.length>=5">{{AO5Data[results.length - 3]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=12">{{AO12Data[results.length - 3]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=100">{{AO100Data[results.length - 3]}}</td>
+              <td v-else></td>
+              <td @click='deleteData((results.length - 2) -1)' class="xMark">X</td>
+            </tr> 
+
+            <tr v-if="results.length >= 4">
+              <td><strong>{{results.length - 3}}. </strong></td>
+              <td>{{results[(results.length - 3) -1].outcome}}</td>
+              <!-- <td>{{results[0].outcome}}</td> -->
+              <td v-if="results.length>=5">{{AO5Data[results.length - 4]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=12">{{AO12Data[results.length - 4]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=100">{{AO100Data[results.length - 4]}}</td>
+              <td v-else></td>
+              <td @click='deleteData((results.length - 3) -1)' class="xMark">X</td>
+            </tr> 
+
+            <tr v-if="results.length >= 5">
+              <td><strong>{{results.length - 4}}. </strong></td>
+              <td>{{results[(results.length - 4) -1].outcome}}</td>
+              <!-- <td>{{results[0].outcome}}</td> -->
+              <td v-if="results.length>=5">{{AO5Data[results.length - 5]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=12">{{AO12Data[results.length - 5]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=100">{{AO100Data[results.length - 5]}}</td>
+              <td v-else></td>
+              <td @click='deleteData((results.length - 4) -1)' class="xMark">X</td>
+            </tr> 
 
 
-          </table>
+
+          </table> 
 
 
         </div>
@@ -58,7 +122,7 @@
             <button class="timer-menu" @click="whichInput = 'typing'">Typing</button> -->
           </div>
           <div class="random-algorithm" style="textAlgin:center">
-            <span>{{randomAlg}}</span>
+            <span @click="csTimer()" >{{randomAlg}}</span>
             <button class="shuffle" @click="algShuffle()">Shuffle</button>
           </div>
 
@@ -78,8 +142,8 @@
 
         </div>
 
-        <table v-if="totalCount !== 0">
-          <thead>
+        <table v-if="totalCount !== 0"> 
+          <thead @click="csTimer()">
             <tr>
               <th></th>
               <th>Time</th>
@@ -93,26 +157,25 @@
             <tr>
               <td><strong>Last</strong></td>
               <td>{{results[(results.length) -1].outcome}}</td>
-              <td>{{AO5Data[0]}}</td>
-              <td>{{AO12Data[0]}}</td>
-              <td>{{AO100Data[0]}}</td>
+              <td>{{AO5Data[results.length -1]}}</td>
+              <td>{{AO12Data[results.length -1]}}</td>
+              <td>{{AO100Data[results.length -1]}}</td>
               <td @click='deleteData((results.length) -1)' class="xMark">X</td>
 .
             </tr>  
-            <tr>
+            <tr @click="csTimer()" >
               <td><strong>Best</strong></td>
               <td>{{bestTime}}</td>
               <td v-if="results.length>= 5">{{Math.min(...AO5Data)}}</td>
               <td v-if="results.length>= 12"> {{Math.min(...AO12Data)}}</td>
               <td v-if="results.length>= 100">{{Math.min(...AO100Data)}}</td>
-              <!-- <td @click='deleteData((results.length) -1)' class="xMark">X</td> -->
             </tr>  
 
           </tbody>
         </table>
 
 
-        <div class="stats">
+        <div class="stats" @click="csTimer()">
 
 
           <hr class="counter-left">
@@ -215,9 +278,6 @@
           
         </div>
       </div>
-      <!-- <div class="timer" @click="csTimer()" v-else>
-        <span class="solving"  >Solving</span>
-      </div> -->
     </div>
 
     <div class="menu-timer" v-if="menu=== 'timer' && running ">
@@ -225,6 +285,9 @@
         <span class="solving-now-span"  >Solving</span>
       </div>
     </div>
+
+
+
     
 
     <div class="menu-stats" v-if="menu==='stats'">
@@ -232,8 +295,7 @@
         <div class="index-input">
           <label for="field1"><span>Showing from  </span><input type="number" class="index-input-field" name="field1" v-model="showingIndex" /></label>
         </div>
-        
-
+      
 
         <table v-if="results.length !== 0">
           <thead>
@@ -242,6 +304,7 @@
               <th>Time</th>
               <th>AO5</th>
               <th>AO12</th>
+              <th>AO100</th>
               <th>Delete</th>
             </tr>
           </thead>
@@ -250,8 +313,12 @@
             <tr v-if="results.length - i <= showingIndex">
               <td><strong>{{results.length - i}}. </strong></td>
               <td>{{results[(results.length - i) -1].outcome}}</td>
-              <td>{{AO5Data[i]}}</td>
-              <td>{{AO12Data[i]}}</td>
+              <td v-if="results.length -i>4">{{AO5Data[results.length - i -1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length -i>11">{{AO12Data[results.length - i -1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length -i>99">{{AO100Data[results.length - i -1]}}</td>
+              <td v-else></td>
               <td @click='deleteData((results.length - i) -1)' class="xMark">X</td>
             </tr>  
           </tbody>
@@ -393,6 +460,7 @@
 
 <script>
 import firebase from "firebase";
+// import { toRaw } from 'vue';
 var moment = require('moment'); // require
 moment().format(); 
 var soundStart = new Audio(`/audio/263133__pan14__tone-beep.m4a`);
@@ -416,13 +484,18 @@ export default {
       AOData: null,
 
       currentTime: null,
-
       callCount: 0,
       AOLoopCount: null,
 
-      AO5Data: null,
-      AO12Data: null,
-      AO100Data: null,
+      wholeAOData:{
+        five: null,
+        twelve: null,
+        hundred: null
+      },
+
+      AO5Data: [],
+      AO12Data: [],
+      AO100Data: [],
 
       sessionGoal: 25,
       sessionCount: 0,
@@ -524,9 +597,22 @@ export default {
         return;
       }
       this.results = [];
+      this.wholeAOData = []
+      this.AO5Data = [];
+      this.AO12Data = [];
+      this.AO100Data = [];
+      this.wholeAOData.five = this.AO5Data;
+      this.wholeAOData.twelve = this.AO12Data;
+      this.wholeAOData.hundred = this.AO100Data;
+
+
       this.sessionCount++
       this.sessionCount= 0
       localStorage.results = JSON.stringify(this.results);
+      // localStorage.wholeAOData = JSON.stringify(this.wholeAOData);
+      localStorage.AO5 = JSON.stringify(this.AO5Data)
+      localStorage.AO12 = JSON.stringify(this.AO12Data)
+      localStorage.AO100 = JSON.stringify(this.AO100Data)
       this.totalCount = 0;
 
     },
@@ -556,6 +642,7 @@ export default {
           this.error = err.message;
         });
     },
+
 
 
     algShuffle(){
@@ -743,12 +830,43 @@ export default {
       }
 
 
-
-
-      // console.log(this.AO5Data)
-      // console.log(this.AO12Data)
-
       
+    },
+    saveAO(){
+      if(this.results.length >= 5){
+        this.AO5Data.push( this.getAO(5,this.results.length -1));
+      }
+      else{
+        this.AO5Data.push(parseInt(100) );
+      }
+
+      if(this.results.length >= 12){
+        this.AO12Data.push( this.getAO(12,this.results.length -1));
+      }
+      else{
+        this.AO12Data.push(parseInt(100));
+      }
+
+      if(this.results.length >= 100){
+        this.AO100Data.push( this.getAO(100,this.results.length -1));
+      }
+      else{
+        this.AO100Data.push(parseInt(100) );
+      }
+      localStorage.AO5 = JSON.stringify(this.AO5Data)
+      localStorage.AO12 = JSON.stringify(this.AO12Data)
+      localStorage.AO100 = JSON.stringify(this.AO100Data)
+
+      // this.wholeAOData.five = this.AO5Data;
+      // this.wholeAOData.twelve = this.AO12Data;
+      // this.wholeAOData.hundred = this.AO100Data;
+
+      // localStorage.wholeAOData = JSON.stringify(this.wholeAOData);
+      
+
+
+
+
     },
     deleteData(num){
       let r= confirm(`Deleting No${num+1}. ${this.results[num].outcome}s...`);
@@ -758,13 +876,43 @@ export default {
       }
       console.log(num)
       this.results.splice(num,1);
-      this.updateAO()
+      if( num >=4){
+        this.AO5Data.splice(num,1)
+      }
+      if( num>= 11){
+        this.AO5Data.splice(num,1)
+      }
+      if( num>= 99){
+        this.AO5Data.splice(num,1)
+      }
+      // this.updateAO()
+
       this.totalCount = this.results.length
       this.getTheBest();
       localStorage.results = JSON.stringify(this.results);
       this.sessionCount--;
       this.dailyCount--;
       this.weeklyCount--;
+
+
+      let i = num;
+      while(i< this.results.length){
+        if( i >= 4){
+          this.AO5Data[i] = this.getAO(5,i)
+          if( i >=11){
+            this.AO12Data[i] = this.getAO(12,i)
+            if( i>=99){
+              this.AO100Data[i] = this.getAO(100,i)
+            }
+          }
+        }
+
+
+        i++
+
+      }
+
+
     },
 
     getTheBest(){
@@ -796,7 +944,8 @@ export default {
         this.sessionCount++;
         this.dailyCount++;
         this.weeklyCount++
-        this.updateAO(); 
+        // this.updateAO(); 
+        this.saveAO()
         this.totalCount = this.results.length;
         this.getTheBest();
         this.algShuffle();
@@ -834,7 +983,7 @@ export default {
       this.totalCount = this.results.length;
       this.sessionCount++;
 
-    },
+    },  
 
 
 
@@ -892,12 +1041,46 @@ export default {
 
 
 
-
     downTest(){
       console.log('down')
     },
     upTest(){
       console.log('up')
+    },
+    addRandomData(){
+      let randomNum = Math.random;
+      let i =0
+      randomNum = randomNum * 20;
+      while(i<1000){
+        randomNum = Math.random();
+        randomNum = randomNum * 20;
+        randomNum = parseFloat(randomNum.toFixed(2))
+        this.results.push({time: Date.now(),outcome: randomNum });
+        this.saveAO()
+        i++
+
+      }
+      console.log(this.results)
+
+      // this.running = false;
+      //   this.timeStopped = new Date();
+      //   clearInterval(this.started);
+        
+      //   this.results.push({time: Date.now(),outcome: Number(this.time) });
+      //   // this.currentTime = null
+
+      //   this.sessionCount++;
+      //   this.dailyCount++;
+      //   this.weeklyCount++
+      //   this.updateAO(); 
+      //   this.totalCount = this.results.length;
+      //   this.getTheBest();
+      //   this.algShuffle();
+      //   // localStorage.results = this.results;
+      //   console.log('updating')
+
+
+
     },
 
   },
@@ -921,15 +1104,15 @@ export default {
       this.results = JSON.parse(localStorage.results);  
       console.log('getting data')
       this.totalCount = this.results.length
-      this.updateAO();
+      // this.updateAO();
       this.getTheBest();
       this.getThePreviousMonday();
       this.checkCounts();
       this.showingIndex = this.results.length
-      // console.log(this.dailyCount)
-      
-      // console.log(this.startOfTheDay)
-      // console.log(this.weeklyCount)
+
+      this.AO5Data = JSON.parse(localStorage.AO5);  
+      this.AO12Data = JSON.parse(localStorage.AO12);  
+      this.AO100Data = JSON.parse(localStorage.AO100);  
     }
     if(localStorage.goalData){
       this.goalData = JSON.parse(localStorage.goalData);
@@ -946,6 +1129,20 @@ export default {
         this.totalGoal = this.goalData.total
       }
     }
+    // if (localStorage.results && !(localStorage.wholeAOData)){
+    //   this.AO5Data = JSON.parse(localStorage.wholeAOData.five)
+    //   this.AO12Data = JSON.parse(localStorage.wholeAOData.twelve)
+    //   this.AO100Data = JSON.parse(localStorage.wholeAODaa.hundred)
+    // }
+    // if(localStorage.wholeAOData){
+      // this.wholeAOData = console.log(JSON.parse(localStorage.wholeAOData))
+      // this.wholeAOData = JSON.parse(localStorage.wholeAOData); 
+
+
+      // this.AO5Data = JSON.parse(localStorage.wholeAOData.five)
+      // this.AO12Data = JSON.parse(localStorage.wholeAOData.twelve)
+      // this.AO100Data = JSON.parse(localStorage.wholeAODaa.hundred)
+    
   },
 
   watch: {
@@ -1505,6 +1702,7 @@ table td{
   left: 0;
   right: 0;
   text-align: center;
+  color: red;
 }
 
 .shuffle{
