@@ -164,14 +164,13 @@
               <td v-if="results.length>=100">{{AO100Data[results.length - 1]}}</td>
               <td v-else></td>
               <td @click='deleteData((results.length) -1)' class="xMark">X</td>
-.
             </tr>  
             <tr @click="csTimer()" >
               <td><strong>Best</strong></td>
               <td>{{bestTime}}</td>
-              <td v-if="results.length>= 5">{{Math.min(...AO5Data)}}</td>
-              <td v-if="results.length>= 12"> {{Math.min(...AO12Data)}}</td>
-              <td v-if="results.length>= 100">{{Math.min(...AO100Data)}}</td>
+              <td v-if="results.length>= 5">{{bestAO5}}</td>
+              <td v-if="results.length>= 12"> {{bestAO12}}</td>
+              <td v-if="results.length>= 100">{{bestAO100}}</td>
             </tr>  
 
           </tbody>
@@ -281,6 +280,7 @@
           
         </div>
       </div>
+
     </div>
     <div class="menu-timer" v-if="menu=== 'timer' && running ">
       <div class="solving-now" @click="csTimer()" >
@@ -603,6 +603,7 @@ export default {
       bestTime: null,
       bestAO5: null,
       bestAO12: null,
+      bestAO100: null,
       WholeDataOfOutcome: [],
       WholeDataOfFive: [],
       WholeDataOfTwelve: [],
@@ -875,6 +876,11 @@ export default {
     saveAO(){
       if(this.results.length >= 5){
         this.AO5Data.push( this.getAO(5,this.results.length -1));
+
+        if(this.getAO(5,this.results.length -1) < this.bestAO5){
+          this.bestAO5 = this.getAO(5,this.results.length -1);
+        }
+        
       }
       else{
         this.AO5Data.push(parseInt(100) );
@@ -882,6 +888,10 @@ export default {
 
       if(this.results.length >= 12){
         this.AO12Data.push( this.getAO(12,this.results.length -1));
+        if(this.getAO(12,this.results.length -1) < this.bestAO12){
+
+          this.bestAO12 = this.getAO(12,this.results.length -1);
+        }
       }
       else{
         this.AO12Data.push(parseInt(100));
@@ -889,6 +899,10 @@ export default {
 
       if(this.results.length >= 100){
         this.AO100Data.push( this.getAO(100,this.results.length -1));
+
+        if(this.getAO(100,this.results.length -1) < this.bestAO100){
+          this.bestAO100 = this.getAO(100,this.results.length -1);
+        }
       }
       else{
         this.AO100Data.push(parseInt(100) );
@@ -1177,6 +1191,11 @@ export default {
       this.AO12Data = JSON.parse(localStorage.AO12);  
       this.AO100Data = JSON.parse(localStorage.AO100);  
       console.log(this.chartData[0].values)
+
+      this.bestAO5 = Math.min(...this.AO5Data);
+      this.bestAO12 = Math.min(...this.AO12Data);
+      this.bestAO100 = Math.min(...this.AO100Data);
+
 
       this.chartData[0].values = [
         
