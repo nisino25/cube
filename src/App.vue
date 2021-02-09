@@ -1146,6 +1146,9 @@ export default {
       console.log(this.AO5Data)
     },
     refreshAO(){
+      this.AO5Data = [];
+      this.AO12Data = [];
+      this.AO100Data = [];
       let i = 0;
       while(i< this.results.length){
         if( i >= 4){
@@ -1154,12 +1157,22 @@ export default {
             this.AO12Data[i] = this.getAO(12,i)
             if( i>=99){
               this.AO100Data[i] = this.getAO(100,i)
+            }else{
+              this.AO100Data[i]  = 100;
             }
+          }else{
+            this.AO12Data[i]  = 100;
           }
+        }else{
+          this.AO5Data[i] = 100;
         }
         i++
       }
+      localStorage.AO5 = JSON.stringify(this.AO5Data)
+      localStorage.AO12 = JSON.stringify(this.AO12Data)
+      localStorage.AO100 = JSON.stringify(this.AO100Data)
       console.log('done')
+
     },
     
 
