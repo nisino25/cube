@@ -1153,20 +1153,42 @@ export default {
       while(i< this.results.length){
         if( i >= 4){
           this.AO5Data[i] = this.getAO(5,i)
-          if( i >=11){
-            this.AO12Data[i] = this.getAO(12,i)
-            if( i>=99){
-              this.AO100Data[i] = this.getAO(100,i)
-            }else{
-              this.AO100Data[i]  = 100;
-            }
-          }else{
-            this.AO12Data[i]  = 100;
-          }
         }else{
           this.AO5Data[i] = 100;
         }
-        i++
+
+        if( i >= 11){
+          this.AO11Data[i] = this.getAO(12,i)
+        }else{
+          this.AO12Data[i] = 100;
+        }
+
+        if( i >= 99){
+          this.AO100Data[i] = this.getAO(100,i)
+        }else{
+          this.AO100Data[i] = 100;
+        }
+        i++;
+
+
+
+          
+        // if( i >= 4){
+        //   this.AO5Data[i] = this.getAO(5,i)
+        //   if( i >=11){
+        //     this.AO12Data[i] = this.getAO(12,i)
+        //     if( i>=99){
+        //       this.AO100Data[i] = this.getAO(100,i)
+        //     }else{
+        //       this.AO100Data[i]  = 100;
+        //     }
+        //   }else{
+        //     this.AO12Data[i]  = 100;
+        //   }
+        // }else{
+        //   this.AO5Data[i] = 100;
+        // }
+        
       }
       localStorage.AO5 = JSON.stringify(this.AO5Data)
       localStorage.AO12 = JSON.stringify(this.AO12Data)
@@ -1178,6 +1200,13 @@ export default {
       if(this.whichStats !== 'chart'){
         return;
       }
+      let i = 0;
+      let totalSum = 0;
+      while(i < this.results.length){
+        totalSum = this.results[i].outcome + totalSum 
+        i++
+      }
+      
 
     },
     
