@@ -5,7 +5,7 @@
     <div class="menu-nav">
       <nav>
         <button class="menu-btn" @click="menu='timer'">Timer</button>
-        <button class="menu-btn" @click="menu='stats', showSomeData()">Stats</button>
+        <button class="menu-btn" @click="menu='stats', getTheAverage()">Stats</button>
         <button class="menu-btn" @click="menu='settings'">Settings</button>
         <!-- <button class="menu-btn" @click="addRandomData()">Settings</button> -->
       </nav>
@@ -355,9 +355,9 @@
 
 
     <div class="menu-setting" v-if="menu==='settings'">
-      <div>
+      <!-- <div>
         {{this.AO5Data}}
-      </div>
+      </div> -->
       <div class="settings">
         <div class="form-style-2">
           <div class="form-style-2-heading">Change your goals</div>
@@ -1172,6 +1172,12 @@ export default {
       localStorage.AO12 = JSON.stringify(this.AO12Data)
       localStorage.AO100 = JSON.stringify(this.AO100Data)
       console.log('done')
+
+    },
+    getTheAverage(){
+      if(this.whichStats !== 'chart'){
+        return;
+      }
 
     },
     
