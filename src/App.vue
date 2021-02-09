@@ -342,7 +342,7 @@
           :colors="['purple', '#ffa3ef', 'light-blue']"
           :dataSets="this.chartData"
           :lineOptions="{dotSize: 3, hideDots: 1,spline: 1 ,xIsSeries: true}"
-          :yMarkers="[{label: 'Average',color: 'red', value: 18, options: { labelPos: 'left'}}]"
+          :yMarkers="[{label: 'Average',color: 'red', value: averageOfSum, options: { labelPos: 'left'}}]"
           :axisOptions="{xIsSeries:true}"
           
           >
@@ -612,6 +612,8 @@ export default {
       WholeDataOfTwelve: [],
 
       showingIndex: null,
+
+      averageOfSum: 0,
 
 
       
@@ -1158,7 +1160,7 @@ export default {
         }
 
         if( i >= 11){
-          this.AO11Data[i] = this.getAO(12,i)
+          this.AO12Data[i] = this.getAO(12,i)
         }else{
           this.AO12Data[i] = 100;
         }
@@ -1169,10 +1171,7 @@ export default {
           this.AO100Data[i] = 100;
         }
         i++;
-
-
-
-          
+  
         // if( i >= 4){
         //   this.AO5Data[i] = this.getAO(5,i)
         //   if( i >=11){
@@ -1206,6 +1205,9 @@ export default {
         totalSum = this.results[i].outcome + totalSum 
         i++
       }
+
+      this.averageOfSum = totalSum / (this.results.length-1)
+
       
 
     },
