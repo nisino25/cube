@@ -5,9 +5,9 @@
     <div class="menu-nav">
       <nav>
         <button class="menu-btn" @click="menu='timer'">Timer</button>
-        <button class="menu-btn" @click="menu='stats'">Stats</button>
-        <!-- <button class="menu-btn" @click="menu='settings'">Settings</button> -->
-        <button class="menu-btn" @click="addRandomData()">Settings</button>
+        <button class="menu-btn" @click="menu='stats', showSomeData()">Stats</button>
+        <button class="menu-btn" @click="menu='settings'">Settings</button>
+        <!-- <button class="menu-btn" @click="addRandomData()">Settings</button> -->
       </nav>
       
     </div>
@@ -157,9 +157,12 @@
             <tr>
               <td><strong>Last</strong></td>
               <td>{{results[(results.length) -1].outcome}}</td>
-              <td>{{AO5Data[results.length -1]}}</td>
-              <td>{{AO12Data[results.length -1]}}</td>
-              <td>{{AO100Data[results.length -1]}}</td>
+              <td v-if="results.length>=5">{{AO5Data[results.length - 1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=12">{{AO12Data[results.length - 1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=100">{{AO100Data[results.length - 1]}}</td>
+              <td v-else></td>
               <td @click='deleteData((results.length) -1)' class="xMark">X</td>
 .
             </tr>  
@@ -279,7 +282,6 @@
         </div>
       </div>
     </div>
-
     <div class="menu-timer" v-if="menu=== 'timer' && running ">
       <div class="solving-now" @click="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
@@ -290,7 +292,7 @@
 
     
 
-    <div class="menu-stats" v-if="menu==='stats'">
+    <div class="menu-stats" v-if="menu==='stats' && whichStats==='table'">
       <div class="stats-table">
         <div class="index-input">
           <label for="field1"><span>Showing from  </span><input type="number" class="index-input-field" name="field1" v-model="showingIndex" /></label>
@@ -326,6 +328,31 @@
         </table>
       </div>
     </div>
+    <div v-if="menu==='stats' && whichStats==='chart'">
+      <div class="AwesomeChart">
+          <vue-frappe
+          class="AwesomeChart"
+          id="test"
+          :labels="[
+            100, Math.ceil(this.results.length * 0.2),Math.ceil(this.results.length * 0.4),Math.ceil(this.results.length * 0.6),Math.ceil(this.results.length * 0.8),  this.results.length
+          ]"
+          title="My Awesome Chart"
+          type="line"
+          :height="350"
+          :colors="['purple', '#ffa3ef', 'light-blue']"
+          :dataSets="this.chartData"
+          :lineOptions="{dotSize: 3, hideDots: 1,spline: 1 ,xIsSeries: true}"
+          :yMarkers="[{label: 'Average',color: 'red', value: 18, options: { labelPos: 'left'}}]"
+          :axisOptions="{xIsSeries:true}"
+          
+          >
+        </vue-frappe>
+
+      </div>
+      
+
+    </div>
+
 
     <div class="menu-setting" v-if="menu==='settings'">
       <div class="settings">
@@ -444,7 +471,13 @@
           
           
           
-        </div>
+      </div>
+      <div class="refresh">
+        <button @click='refreshAO()'>Refresh AO</button>&nbsp;&nbsp;&nbsp;
+        <button  @click="whichStats='chart'">Show the chart</button>&nbsp;
+        <button @click="whichStats='table'">Show the table</button>&nbsp;&nbsp;&nbsp;
+      </div>
+
     </div>
 
 
@@ -459,18 +492,46 @@
 </template>
 
 <script>
-import firebase from "firebase";
+
+ 
+// import firebase from "firebase";
 // import { toRaw } from 'vue';
 var moment = require('moment'); // require
 moment().format(); 
 var soundStart = new Audio(`/audio/263133__pan14__tone-beep.m4a`);
-// var sound10Seconds = new Audio(`/audio/413690__splatez07__click.m4a`);
+import { VueFrappe } from 'vue2-frappe'
 
 
 export default {
+  components: {
+    VueFrappe,
+  },
 
   data(){
     return{
+      chartData: [
+        // {
+        //   name: "Some Data", chartType: 'bar',
+        //   values: [25, 40, 30, 35, 8, 52, 17, -4]
+        // },
+        {
+          name: "Yet Another", chartType: 'line',
+          values: [
+            0,0,0,0
+          ],
+          // yMarkers: [
+          //   {
+          //     label: "Threshold",
+          //     value: 650,
+          //     options: { labelPos: 'left' } // default: 'right'
+          //   }
+          // ]
+        }
+      ],
+
+
+
+
       results: [],
       reverseResults: [],
       message:"Hello",
@@ -512,6 +573,7 @@ export default {
 
       whichInput: 'default',
       menu: 'timer',
+      whichStats: 'table',
       goalData: {
         session: null,
         daily: null,
@@ -561,6 +623,10 @@ export default {
   },
 
   methods:{
+
+    getRandomInt () {
+      return Math.floor(Math.random() * (50 - 5 + 1)) + 5
+    },
 
     checkCounts(){
       let i = 0;
@@ -615,32 +681,6 @@ export default {
       localStorage.AO100 = JSON.stringify(this.AO100Data)
       this.totalCount = 0;
 
-    },
-    register() {
-      firebase
-        .auth()
-        .createUserWithEmailAndPassword(this.form.email, this.form.password)
-        .then(data => {
-          data.user
-            .updateProfile({
-              displayName: this.form.name
-            })
-            .then(() => {});
-        })
-        .catch(err => {
-          this.error = err.message;
-        });
-    },
-    login() {
-      firebase
-        .auth()
-        .signInWithEmailAndPassword(this.form.email, this.form.password)
-        // .then(data => {
-        //   this.$router.replace({ name: "Dashboard" });
-        // })
-        .catch(err => {
-          this.error = err.message;
-        });
     },
 
 
@@ -1050,7 +1090,7 @@ export default {
     addRandomData(){
       let randomNum = Math.random;
       let i =0
-      randomNum = randomNum * 20;
+      randomNum = randomNum * 30;
       while(i<1000){
         randomNum = Math.random();
         randomNum = randomNum * 20;
@@ -1082,6 +1122,29 @@ export default {
 
 
     },
+    updateChart(){
+
+    },
+    showSomeData(){
+      console.log(this.AO5Data)
+    },
+    refreshAO(){
+      let i = 0;
+      while(i< this.results.length){
+        if( i >= 4){
+          this.AO5Data[i] = this.getAO(5,i)
+          if( i >=11){
+            this.AO12Data[i] = this.getAO(12,i)
+            if( i>=99){
+              this.AO100Data[i] = this.getAO(100,i)
+            }
+          }
+        }
+        i++
+      }
+      console.log('done')
+    },
+    
 
   },
   created() {
@@ -1113,6 +1176,52 @@ export default {
       this.AO5Data = JSON.parse(localStorage.AO5);  
       this.AO12Data = JSON.parse(localStorage.AO12);  
       this.AO100Data = JSON.parse(localStorage.AO100);  
+      console.log(this.chartData[0].values)
+
+      this.chartData[0].values = [
+        
+        // this.results[100].outcome,
+        this.results[Math.ceil(this.results.length * 0.1)].outcome,
+        this.results[Math.ceil(this.results.length * 0.2)].outcome,
+        this.results[Math.ceil(this.results.length * 0.3)].outcome,
+        this.results[Math.ceil(this.results.length * 0.4)].outcome,
+        this.results[Math.ceil(this.results.length * 0.5)].outcome,
+        this.results[Math.ceil(this.results.length * 0.6)].outcome,
+        this.results[Math.ceil(this.results.length * 0.7)].outcome,
+        this.results[Math.ceil(this.results.length * 0.8)].outcome,
+        this.results[Math.ceil(this.results.length * 0.9)].outcome,
+        this.results[Math.ceil(this.results.length * 0.1)].outcome,
+        this.results[Math.ceil(this.results.length * 0.2)].outcome,
+        this.results[Math.ceil(this.results.length * 0.3)].outcome,
+        this.results[Math.ceil(this.results.length * 0.4)].outcome,
+        this.results[Math.ceil(this.results.length * 0.5)].outcome,
+        this.results[Math.ceil(this.results.length * 0.6)].outcome,
+        this.results[Math.ceil(this.results.length * 0.7)].outcome,
+        this.results[Math.ceil(this.results.length * 0.8)].outcome,
+        this.results[Math.ceil(this.results.length * 0.9)].outcome,
+        this.results[Math.ceil(this.results.length * 0.1)].outcome,
+        this.results[Math.ceil(this.results.length * 0.2)].outcome,
+        this.results[Math.ceil(this.results.length * 0.3)].outcome,
+        this.results[Math.ceil(this.results.length * 0.4)].outcome,
+        this.results[Math.ceil(this.results.length * 0.5)].outcome,
+        this.results[Math.ceil(this.results.length * 0.6)].outcome,
+        this.results[Math.ceil(this.results.length * 0.7)].outcome,
+        this.results[Math.ceil(this.results.length * 0.8)].outcome,
+        this.results[Math.ceil(this.results.length * 0.9)].outcome,
+        this.results[Math.ceil(this.results.length * 0.1)].outcome,
+        this.results[Math.ceil(this.results.length * 0.2)].outcome,
+        this.results[Math.ceil(this.results.length * 0.3)].outcome,
+        this.results[Math.ceil(this.results.length * 0.4)].outcome,
+        this.results[Math.ceil(this.results.length * 0.5)].outcome,
+        this.results[Math.ceil(this.results.length * 0.6)].outcome,
+        this.results[Math.ceil(this.results.length * 0.7)].outcome,
+        this.results[Math.ceil(this.results.length * 0.8)].outcome,
+        this.results[Math.ceil(this.results.length * 0.9)].outcome,
+        this.results[Math.ceil(this.results.length * 0.9)].outcome,this.results[Math.ceil(this.results.length * 0.9)].outcome,this.results[Math.ceil(this.results.length * 0.9)].outcome,this.results[Math.ceil(this.results.length * 0.9)].outcome,this.results[Math.ceil(this.results.length * 0.9)].outcome,this.results[Math.ceil(this.results.length * 0.9)].outcome,
+        this.results[this.results.length-1].outcome,
+        30,30,30
+      ]
+      console.log(this.chartData[0].values)
     }
     if(localStorage.goalData){
       this.goalData = JSON.parse(localStorage.goalData);
@@ -1129,19 +1238,8 @@ export default {
         this.totalGoal = this.goalData.total
       }
     }
-    // if (localStorage.results && !(localStorage.wholeAOData)){
-    //   this.AO5Data = JSON.parse(localStorage.wholeAOData.five)
-    //   this.AO12Data = JSON.parse(localStorage.wholeAOData.twelve)
-    //   this.AO100Data = JSON.parse(localStorage.wholeAODaa.hundred)
-    // }
-    // if(localStorage.wholeAOData){
-      // this.wholeAOData = console.log(JSON.parse(localStorage.wholeAOData))
-      // this.wholeAOData = JSON.parse(localStorage.wholeAOData); 
 
 
-      // this.AO5Data = JSON.parse(localStorage.wholeAOData.five)
-      // this.AO12Data = JSON.parse(localStorage.wholeAOData.twelve)
-      // this.AO100Data = JSON.parse(localStorage.wholeAODaa.hundred)
     
   },
 
@@ -1320,38 +1418,6 @@ export default {
 
 
   }, 
-  state: {
-    user: {
-      loggedIn: false,
-      data: null
-    }
-  },
-  getters: {
-      user(state){
-        return state.user
-      }
-    },
-  mutations: {
-    SET_LOGGED_IN(state, value) {
-      state.user.loggedIn = value;
-    },
-    SET_USER(state, data) {
-      state.user.data = data;
-    }
-  },
-  actions: {
-    fetchUser({ commit }, user) {
-      commit("SET_LOGGED_IN", user !== null);
-      if (user) {
-        commit("SET_USER", {
-          displayName: user.displayName,
-          email: user.email
-        });
-      } else {
-        commit("SET_USER", null);
-      }
-    }
-  },
 
     
   name: 'App',
@@ -1360,6 +1426,7 @@ export default {
 </script>
 
 <style>
+
 /* #E8E8E8 grey */
 /* #4fc08d green */
 body {
@@ -1786,6 +1853,13 @@ table td{
 .menu-stats table{
   /* position: ; */
   margin-top:25px;
+}
+
+.AwesomeChart{
+  position: absolute;
+  width: 108%;
+  left: -5%;
+
 }
 
 
