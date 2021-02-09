@@ -355,6 +355,9 @@
 
 
     <div class="menu-setting" v-if="menu==='settings'">
+      <div>
+        {{this.AO5Data}}
+      </div>
       <div class="settings">
         <div class="form-style-2">
           <div class="form-style-2-heading">Change your goals</div>
