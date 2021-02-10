@@ -283,7 +283,7 @@
 
     </div>
     <div class="menu-timer" v-if="menu=== 'timer' && running ">
-      <div class="solving-now" @click="csTimer()" >
+      <div class="solving-now" @click="csTimer()" @hover="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
       </div>
     </div>
@@ -329,21 +329,29 @@
       </div>
     </div>
     <div v-if="menu==='stats' && whichStats==='chart'">
-      <div class="AwesomeChart">
+      <div class="AwesomeChart" v-if="results.length >= 100">
           <vue-frappe
           class="AwesomeChart"
           id="test"
           :labels="[
-            100, Math.ceil(this.results.length * 0.2),Math.ceil(this.results.length * 0.4),Math.ceil(this.results.length * 0.6),Math.ceil(this.results.length * 0.8),  this.results.length
+            25, 
+            '','','','','','','','','','','','','','','','','','','','',
+            '','','','','','','','','','','','','','','','','','','','',
+            '','','','','','','','','','','','','','','','','','','','',
+            '','','','','','','','','','','','','','','','','','','','',
+            '','','','','','','','','','','','','','','','','','','',
+            
+            this.results.length,
           ]"
           title="My Awesome Chart"
           type="line"
-          :height="350"
+          :height="450"
           :colors="['purple', '#ffa3ef', 'light-blue']"
           :dataSets="this.chartData"
-          :lineOptions="{dotSize: 3, hideDots: 1,spline: 1 ,xIsSeries: true}"
+          :lineOptions="{hideDots: 1,xIsSeries: true,regionFill: 1 }"
           :yMarkers="[{label: 'Average',color: 'red', value: averageOfSum, options: { labelPos: 'left'}}]"
           :axisOptions="{xIsSeries:true}"
+          :yAxis="{zeroline:10}"
           
           >
         </vue-frappe>
@@ -496,14 +504,10 @@
 
 <script>
 
- 
-// import firebase from "firebase";
-// import { toRaw } from 'vue';
 var moment = require('moment'); // require
 moment().format(); 
 var soundStart = new Audio(`/audio/263133__pan14__tone-beep.m4a`);
 import { VueFrappe } from 'vue2-frappe'
-
 
 export default {
   components: {
@@ -533,8 +537,6 @@ export default {
       ],
 
 
-
-
       results: [],
       reverseResults: [],
       message:"Hello",
@@ -560,6 +562,7 @@ export default {
       AO5Data: [],
       AO12Data: [],
       AO100Data: [],
+      AO25Data: [],
 
       sessionGoal: 25,
       sessionCount: 0,
@@ -576,7 +579,7 @@ export default {
 
       whichInput: 'default',
       menu: 'timer',
-      whichStats: 'table',
+      whichStats: 'chart',
       goalData: {
         session: null,
         daily: null,
@@ -607,6 +610,7 @@ export default {
       bestAO5: null,
       bestAO12: null,
       bestAO100: null,
+      bestAO25: null,
       WholeDataOfOutcome: [],
       WholeDataOfFive: [],
       WholeDataOfTwelve: [],
@@ -677,6 +681,8 @@ export default {
       this.wholeAOData.twelve = this.AO12Data;
       this.wholeAOData.hundred = this.AO100Data;
 
+      this.AO25Data
+
 
       this.sessionCount++
       this.sessionCount= 0
@@ -685,10 +691,10 @@ export default {
       localStorage.AO5 = JSON.stringify(this.AO5Data)
       localStorage.AO12 = JSON.stringify(this.AO12Data)
       localStorage.AO100 = JSON.stringify(this.AO100Data)
+      localStorage.AO25Data = JSON.stringify(this.AO25Data)
       this.totalCount = 0;
 
     },
-
 
 
     algShuffle(){
@@ -880,7 +886,7 @@ export default {
     },
     saveAO(){
       if(this.results.length >= 5){
-        this.AO5Data.push( this.getAO(5,this.results.length -1));
+        this.AO5Data.push( Number(this.getAO(5,this.results.length -1)));
 
         if(this.getAO(5,this.results.length -1) < this.bestAO5){
           this.bestAO5 = this.getAO(5,this.results.length -1);
@@ -892,7 +898,7 @@ export default {
       }
 
       if(this.results.length >= 12){
-        this.AO12Data.push( this.getAO(12,this.results.length -1));
+        this.AO12Data.push( Number(this.getAO(12,this.results.length -1)));
         if(this.getAO(12,this.results.length -1) < this.bestAO12){
 
           this.bestAO12 = this.getAO(12,this.results.length -1);
@@ -902,8 +908,19 @@ export default {
         this.AO12Data.push(parseInt(100));
       }
 
+      if(this.results.length >= 24){
+        this.AO25Data.push( Number(this.getAO(25,this.results.length -1)));
+        if(this.getAO(25,this.results.length -1) < this.bestAO25){
+
+          this.bestAO25 = this.getAO(25,this.results.length -1);
+        }
+      }
+      else{
+        this.AO12Data.push(parseInt(100));
+      }
+
       if(this.results.length >= 100){
-        this.AO100Data.push( this.getAO(100,this.results.length -1));
+        this.AO100Data.push( Number(this.getAO(100,this.results.length -1)));
 
         if(this.getAO(100,this.results.length -1) < this.bestAO100){
           this.bestAO100 = this.getAO(100,this.results.length -1);
@@ -915,6 +932,8 @@ export default {
       localStorage.AO5 = JSON.stringify(this.AO5Data)
       localStorage.AO12 = JSON.stringify(this.AO12Data)
       localStorage.AO100 = JSON.stringify(this.AO100Data)
+      localStorage.AO25 = JSON.stringify(this.AO25Data)
+
 
       // this.wholeAOData.five = this.AO5Data;
       // this.wholeAOData.twelve = this.AO12Data;
@@ -1046,7 +1065,6 @@ export default {
 
 
 
-
     start() {
       if(this.running) return;
       
@@ -1141,9 +1159,6 @@ export default {
 
 
     },
-    updateChart(){
-
-    },
     showSomeData(){
       console.log(this.AO5Data)
     },
@@ -1151,22 +1166,30 @@ export default {
       this.AO5Data = [];
       this.AO12Data = [];
       this.AO100Data = [];
+      this.AO25Data = [];
       let i = 0;
       while(i< this.results.length){
         if( i >= 4){
-          this.AO5Data[i] = this.getAO(5,i)
+          this.AO5Data[i] = Number(this.getAO(5,i))
         }else{
           this.AO5Data[i] = 100;
         }
 
         if( i >= 11){
-          this.AO12Data[i] = this.getAO(12,i)
+          this.AO12Data[i] = Number(this.getAO(12,i))
         }else{
           this.AO12Data[i] = 100;
         }
 
+        if( i >= 24){
+          // this.AO25Data[i] = parseInt( this.getAO(25,i)) 
+          this.AO25Data[i] = Number(this.getAO(25,i)  )
+        }else{
+          this.AO25Data[i] = 100;
+        }
+
         if( i >= 99){
-          this.AO100Data[i] = this.getAO(100,i)
+          this.AO100Data[i] = Number(this.getAO(100,i))
         }else{
           this.AO100Data[i] = 100;
         }
@@ -1192,7 +1215,11 @@ export default {
       localStorage.AO5 = JSON.stringify(this.AO5Data)
       localStorage.AO12 = JSON.stringify(this.AO12Data)
       localStorage.AO100 = JSON.stringify(this.AO100Data)
+      localStorage.AO25 = JSON.stringify(this.AO25Data)
       console.log('done')
+      console.log(this.AO25Data)
+      console.log('20');
+      console.log(parseInt('20'))
 
     },
     getTheAverage(){
@@ -1208,6 +1235,22 @@ export default {
 
       this.averageOfSum = totalSum / (this.results.length-1)
 
+      this.updateChart()
+
+      
+
+    },
+    updateChart(){
+      let i = 0;
+      let iii = 0.01;
+      while(i< 99){
+        // this.chartData[0].values[i]= Math.ceil(((this.results.length - 25) * iii) + 25),
+        this.chartData[0].values[i]= this.AO25Data[Math.ceil(((this.results.length - 25) * iii) + 25)],
+
+        i++;
+        iii = iii + 0.01
+      }
+      
       
 
     },
@@ -1228,7 +1271,6 @@ export default {
 
     // this.reverseRe sults = this.results.reverse()
   },
-
   mounted() {
     if (localStorage.results) {
       this.results = JSON.parse(localStorage.results);  
@@ -1243,11 +1285,13 @@ export default {
       this.AO5Data = JSON.parse(localStorage.AO5);  
       this.AO12Data = JSON.parse(localStorage.AO12);  
       this.AO100Data = JSON.parse(localStorage.AO100);  
-      console.log(this.chartData[0].values)
+      this.AO25Data = JSON.parse(localStorage.AO25);  
 
       this.bestAO5 = Math.min(...this.AO5Data);
       this.bestAO12 = Math.min(...this.AO12Data);
       this.bestAO100 = Math.min(...this.AO100Data);
+      this.bestAO25 = Math.min(...this.AO25Data);
+      
 
 
       this.chartData[0].values = [
@@ -1293,7 +1337,6 @@ export default {
         this.results[this.results.length-1].outcome,
         30,30,30
       ]
-      console.log(this.chartData[0].values)
     }
     if(localStorage.goalData){
       this.goalData = JSON.parse(localStorage.goalData);
@@ -1314,7 +1357,6 @@ export default {
 
     
   },
-
   watch: {
     sessionCount: function() {
       localStorage.results = JSON.stringify(this.results);
@@ -1490,14 +1532,16 @@ export default {
 
 
   }, 
-
-    
+  
   name: 'App',
 }
 
 </script>
 
 <style>
+ .line-vertical {
+    display: none;
+}
 
 /* #E8E8E8 grey */
 /* #4fc08d green */
