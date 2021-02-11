@@ -1,5 +1,6 @@
 <template>
-<body>
+
+<body style=" overflow: hidden;" class="overflowing">
   <div class="wrapper">
 
     <div class="menu-nav">
@@ -13,10 +14,12 @@
     </div>
 
     <div class="menu-timer" v-if="menu=== 'timer' && !running ">
-      <div class="graph" >
-        <span  style="position: absolute;right:5%; margin-top: 1%; color: red;" @click="clearTheLocal()">X</span>
+
+      <div class="graph" v-if="smallBox === 'table' ">
+        
         <div class="actual-graph">
-          
+          <button class="chart-button" @click="smallBox = 'chart', whichStats = 'chart' ">Chart</button>
+        
 
            <table v-if="results.length !== 0"> 
             <thead>
@@ -26,7 +29,6 @@
                 <th>AO5</th>
                 <th>AO12</th>
                 <th>AO100</th>
-                <th>Delete</th>
               </tr>
             </thead>
 
@@ -42,7 +44,7 @@
 
             </tbody> -->
             <tr >
-              <td><strong>{{results.length - 0}}. </strong></td>
+              <td><strong>{{results.length - 0}} </strong></td>
               <td>{{results[(results.length - 0) -1].outcome}}</td>
               <!-- <td>{{results[0].outcome}}</td> -->
               <td v-if="results.length>=5">{{AO5Data[results.length - 1]}}</td>
@@ -55,7 +57,7 @@
             </tr>  
 
             <tr v-if="results.length >= 2">
-              <td><strong>{{results.length - 1}}. </strong></td>
+              <td><strong>{{results.length - 1}} </strong></td>
               <td>{{results[(results.length - 1) -1].outcome}}</td>
               <!-- <td>{{results[0].outcome}}</td> -->
               <td v-if="results.length>=5">{{AO5Data[results.length - 2]}}</td>
@@ -68,7 +70,7 @@
             </tr> 
 
             <tr v-if="results.length >= 3">
-              <td><strong>{{results.length - 2}}. </strong></td>
+              <td><strong>{{results.length - 2}}</strong></td>
               <td>{{results[(results.length - 2) -1].outcome}}</td>
               <!-- <td>{{results[0].outcome}}</td> -->
               <td v-if="results.length>=5">{{AO5Data[results.length - 3]}}</td>
@@ -81,7 +83,7 @@
             </tr> 
 
             <tr v-if="results.length >= 4">
-              <td><strong>{{results.length - 3}}. </strong></td>
+              <td><strong>{{results.length - 3}}</strong></td>
               <td>{{results[(results.length - 3) -1].outcome}}</td>
               <!-- <td>{{results[0].outcome}}</td> -->
               <td v-if="results.length>=5">{{AO5Data[results.length - 4]}}</td>
@@ -94,7 +96,7 @@
             </tr> 
 
             <tr v-if="results.length >= 5">
-              <td><strong>{{results.length - 4}}. </strong></td>
+              <td><strong>{{results.length - 4}} </strong></td>
               <td>{{results[(results.length - 4) -1].outcome}}</td>
               <!-- <td>{{results[0].outcome}}</td> -->
               <td v-if="results.length>=5">{{AO5Data[results.length - 5]}}</td>
@@ -113,6 +115,39 @@
 
         </div>
       </div>
+
+      <div class="graph-chart" v-if="smallBox === 'chart' ">
+        <div class="AwesomeChart" v-if="results.length >= 125 ">
+          <span class="showing-label">Showing Last 100 of AO25</span>
+          <button class="table-button" @click="smallBox = 'table', whichStats = 'table'">Table</button>
+          <vue-frappe
+          class="small-chart"
+          id="test"
+          :labels="[
+            this.results.length -100, 
+            '','','','','','','','','','','','','','','','','','','','',
+            '','','','','','','','','','','','','','','','','','','','',
+            '','','','','','','','','','','','','','','','','','','','',
+            '','','','','','','','','','','','','','','','','','','','',
+            '','','','','','','','','','','','','','','','','','',
+            
+            this.results.length,
+          ]"
+          type="line"
+          :height="160"
+          :colors="['purple', '#ffa3ef', 'light-blue']"
+          :dataSets="this.smallBoxData"
+          :lineOptions="{hideDots: 1,xIsSeries: true,regionFill: 1 }"
+          :yMarkers="[{label: 'Average',color: 'red', value: smallAverage, options: { labelPos: 'left'}}]"
+          :axisOptions="{xIsSeries:true}"
+          :yAxis="{zeroline:10}"
+          
+          >
+        </vue-frappe>
+
+      </div>
+      </div>
+
 
       <div class="timer" v-if="!running"  >
         <div class="display">
@@ -282,7 +317,7 @@
       </div>
 
     </div>
-    <div class="menu-timer" v-if="menu=== 'timer' && running ">
+    <div class="menu-timer" v-if="menu=== 'timer' && running " >
       <div class="solving-now" @click="csTimer()" @hover="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
       </div>
@@ -292,14 +327,13 @@
 
     
 
-    <div class="menu-stats" v-if="menu==='stats' && whichStats==='table'">
+    <div class="menu-stats" v-if="menu==='stats' && whichStats==='table'" style="overflow:visible">
       <div class="stats-table">
         <div class="index-input">
           <label for="field1"><span>Showing from  </span><input type="number" class="index-input-field" name="field1" v-model="showingIndex" /></label>
         </div>
-      
 
-        <table v-if="results.length !== 0">
+        <table v-if="results.length !== 0" style="overflow:visible">
           <thead>
             <tr>
               <th>No.</th>
@@ -307,13 +341,12 @@
               <th>AO5</th>
               <th>AO12</th>
               <th>AO100</th>
-              <th>Delete</th>
             </tr>
           </thead>
 
           <tbody v-for="(result, i) in results" :key="i" >
             <tr v-if="results.length - i <= showingIndex">
-              <td><strong>{{results.length - i}}. </strong></td>
+              <td><strong>{{results.length - i}} </strong></td>
               <td>{{results[(results.length - i) -1].outcome}}</td>
               <td v-if="results.length -i>4">{{AO5Data[results.length - i -1]}}</td>
               <td v-else></td>
@@ -328,7 +361,7 @@
         </table>
       </div>
     </div>
-    <div v-if="menu==='stats' && whichStats==='chart'">
+    <div v-if="menu==='stats' && whichStats==='chart'" style="overflow:scroll">
       <div class="AwesomeChart" v-if="results.length >= 100">
           <vue-frappe
           class="AwesomeChart"
@@ -484,9 +517,10 @@
           
       </div>
       <div class="refresh">
-        <button @click='refreshAO()'>Refresh AO</button>&nbsp;&nbsp;&nbsp;
-        <button  @click="whichStats='chart'">Show the chart</button>&nbsp;
-        <button @click="whichStats='table'">Show the table</button>&nbsp;&nbsp;&nbsp;
+        <button @click='refreshAO()'>Refresh AO</button>&nbsp;
+        <button  @click="whichStats='chart', smallBox ='chart'">Show chart</button>&nbsp;
+        <button @click="whichStats='table', smallBox ='table'">Show table</button>&nbsp;
+        <button @click="clearTheLocal()" >X</button>
       </div>
 
     </div>
@@ -517,23 +551,21 @@ export default {
   data(){
     return{
       chartData: [
-        // {
-        //   name: "Some Data", chartType: 'bar',
-        //   values: [25, 40, 30, 35, 8, 52, 17, -4]
-        // },
         {
-          name: "Yet Another", chartType: 'line',
+          name: "AO25", chartType: 'line',
           values: [
             0,0,0,0
           ],
-          // yMarkers: [
-          //   {
-          //     label: "Threshold",
-          //     value: 650,
-          //     options: { labelPos: 'left' } // default: 'right'
-          //   }
-          // ]
         }
+      ],
+      smallBoxData:[
+        {
+          name: "AO25", chartType: 'line',
+          values: [
+            0,0,0,0
+          ],
+        }
+        
       ],
 
 
@@ -580,6 +612,7 @@ export default {
       whichInput: 'default',
       menu: 'timer',
       whichStats: 'chart',
+      smallBox: 'chart',
       goalData: {
         session: null,
         daily: null,
@@ -618,6 +651,7 @@ export default {
       showingIndex: null,
 
       averageOfSum: 0,
+      smallAverage: 0,
 
 
       
@@ -958,10 +992,13 @@ export default {
         this.AO5Data.splice(num,1)
       }
       if( num>= 11){
-        this.AO5Data.splice(num,1)
+        this.AO12Data.splice(num,1)
+      }
+      if( num>= 24){
+        this.AO25Data.splice(num,1)
       }
       if( num>= 99){
-        this.AO5Data.splice(num,1)
+        this.AO100Data.splice(num,1)
       }
       // this.updateAO()
 
@@ -979,8 +1016,11 @@ export default {
           this.AO5Data[i] = this.getAO(5,i)
           if( i >=11){
             this.AO12Data[i] = this.getAO(12,i)
-            if( i>=99){
+            if( i>=24){
+              this.AO25Data[i] = this.getAO(25,i)
+              if( i>=99){
               this.AO100Data[i] = this.getAO(100,i)
+              }
             }
           }
         }
@@ -989,6 +1029,10 @@ export default {
         i++
 
       }
+      localStorage.AO5 = JSON.stringify(this.AO5Data)
+      localStorage.AO12 = JSON.stringify(this.AO12Data)
+      localStorage.AO100 = JSON.stringify(this.AO100Data)
+      localStorage.AO25 = JSON.stringify(this.AO25Data)
 
 
     },
@@ -1029,6 +1073,20 @@ export default {
         this.algShuffle();
         // localStorage.results = this.results;
         console.log('updating')
+
+        if(this.results.length >=125){
+          let i = 0;
+          let iii = 100;
+          let iiiii = 0;
+          while(i< 100){
+            this.smallBoxData[0].values[i]= this.AO25Data[this.results.length -1 -iii],
+            iiiii = iiiii+ Number( this.AO25Data[this.results.length -1 -iii]),
+            i++;
+            
+            iii--;
+          }
+          this.smallAverage = iiiii /100
+        }
 
 
         return;
@@ -1337,6 +1395,35 @@ export default {
         this.results[this.results.length-1].outcome,
         30,30,30
       ]
+
+      if(this.results.length >=125){
+        let i = 0;
+        let iii = 100;
+        let iiiii = 0;
+        while(i< 100){
+          this.smallBoxData[0].values[i]= this.AO25Data[this.results.length -1 -iii],
+          iiiii = iiiii+ Number( this.AO25Data[this.results.length -1 -iii]),
+          i++;
+          
+          iii--;
+        }
+        this.smallAverage = iiiii /100
+      }
+
+      // if(this.results.length >=125){
+      //   let i = 0;
+      //   let iii = 100;
+      //   let isum= 0;
+      //   while(i< 100){
+      //     this.smallBoxData[0].values[i]= this.AO25Data[this.results.length -1 -iii],
+      //     isum = isum + this.AO25Data[this.results.length -1 -iii]
+      //     i++;
+      //     iii--;
+      //   }
+      
+      //   this.smallAverage =  isum / 100
+      // }
+      
     }
     if(localStorage.goalData){
       this.goalData = JSON.parse(localStorage.goalData);
@@ -1543,11 +1630,21 @@ export default {
     display: none;
 }
 
+.overflowing{
+  overflow: hidden;
+}
+
+.notOverflowing{
+
+}
+
 /* #E8E8E8 grey */
 /* #4fc08d green */
 body {
   margin:0;
   padding:0;
+  overflow: hidden;
+  
   
   background-color: #4fc08d;
   /* background-color: red; */
@@ -1573,8 +1670,29 @@ body {
   /* background-color: #304455; */
   border: solid 1px black;
 }
+.graph-chart{
+  position: absolute;
+  width: 100%;
+  top: 8.5%;
+  height:28%;
+  /* width: 60em; */
+  /* background-color: #304455; */
+  border: solid 1px black;
+}
+.small-chart{
+  margin-top: 5%;
+  position: absolute;
+  width: 100%;
+  top: 30%;
+  /* height:10%; */
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
 .timer{
   position: absolute;
+  overflow: hidden;
   width: 100%;
 
   top: 39%;
@@ -1640,6 +1758,15 @@ body {
   position: absolute;
 }
 
+.showing-label{
+  margin-top: 3%;
+  font-size: 100%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  top: -20%
+}
 
 
 .counter-label-settings{
@@ -1903,6 +2030,38 @@ table td{
   border: solid 1px grey;
 }
 
+.table-button{
+  margin-top: 3%;
+  position: absolute;
+  right:5%;
+
+  outline:none;
+  padding: 3px;
+  padding-right: 15px;
+  padding-left: 15px;
+  font-size: 50%;
+
+  background-color: #304455;
+  color:#E8E8E8 ;
+  border: solid 1px grey;
+}
+
+
+.chart-button{
+  margin-top: 0.5%;
+  position: absolute;
+  right:1.5%;
+
+  outline:none;
+  padding: 3px;
+  padding-right: 15px;
+  padding-left: 15px;
+  font-size: 50%;
+
+  background-color: #304455;
+  color:#E8E8E8 ;
+  border: solid 1px grey;
+}
 
 
 
