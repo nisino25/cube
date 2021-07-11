@@ -4,7 +4,9 @@
 
 <body style=" overflow: hidden;" class="overflowing">
   <small>
-    {{results}}
+    <small v-for="result in results" :key="result">
+      {{ result.outcome }},
+    </small>
   </small>
   <div class="wrapper">
 
