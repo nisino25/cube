@@ -3,11 +3,6 @@
 
 
 <body style=" overflow: hidden;" class="overflowing">
-  <small>
-    <small v-for="result in results" :key="result">
-      {{ result.outcome }},
-    </small>
-  </small>
   <div class="wrapper">
 
     <div class="menu-nav">
@@ -1676,7 +1671,7 @@ export default {
 body {
   margin:0;
   padding:0;
-  /* overflow: hidden; */
+  overflow: hidden;
   
   
   background-color: #4fc08d;
