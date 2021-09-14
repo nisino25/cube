@@ -406,7 +406,7 @@
           
           >
         </vue-frappe>
-        <button>Show Last 2k</button>
+        <button class="shuffle">Show Last 2k</button>
 
       </div>
       
