@@ -406,6 +406,7 @@
           
           >
         </vue-frappe>
+        <button>Show Last 2k</button>
 
       </div>
       
@@ -597,6 +598,8 @@ export default {
       reverseResults: [],
       message:"Hello",
       imadesho: false,
+
+      showingLast2k: false,
 
 
       AOSum: null, 
@@ -830,7 +833,7 @@ export default {
       }
 
       this.pastAlgs.unshift(this.randomAlg);
-      if(this.pastAlgs.length> 5){
+      if(this.pastAlgs.length> 4){
         this.pastAlgs.pop()
       }
       
