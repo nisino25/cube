@@ -414,11 +414,8 @@
 
 
     <div class="menu-setting" v-if="menu==='settings'">
-      <!-- <div>
-        {{this.AO5Data}}
-      </div> -->
-      <div class="settings">
-        <div class="form-style-2">
+      <div class="settings" v-if="!showingPastAlgs">
+        <div class="form-style-2" >
           <div class="form-style-2-heading">Change your goals</div>
           <form action="" method="post">
             <label for="field1"><span>Session Goal <span class="required">*</span></span><input type="number" class="input-field" name="field1" v-model="sessionGoal" /></label>
@@ -536,9 +533,15 @@
       </div>
       <div class="refresh">
         <button @click='refreshAO()'>Refresh AO</button>&nbsp;
-        <button  @click="whichStats='chart', smallBox ='chart'">Show chart</button>&nbsp;
-        <button @click="whichStats='table', smallBox ='table'">Show table</button>&nbsp;
+        <button @click='showingPastAlgs = !showingPastAlgs'>Show the algs</button>&nbsp;
+
         <button @click="clearTheLocal()" >X</button>
+      </div>
+
+      <div v-if="showingPastAlgs">
+        <br>
+        <li v-for="(i, algs ) in pastAlgs" :key="algs">{{i}} <br><br> </li>
+        
       </div>
 
     </div>
@@ -585,6 +588,9 @@ export default {
         }
         
       ],
+
+      pastAlgs: [],
+      showingPastAlgs: false,
 
 
       results: [],
@@ -821,6 +827,11 @@ export default {
         case (this.randomNum < 1):
           this.currentLetter = 'B'
           break;
+      }
+
+      this.pastAlgs.unshift(this.randomAlg);
+      if(this.pastAlgs.length> 5){
+        this.pastAlgs.pop()
       }
       
       
