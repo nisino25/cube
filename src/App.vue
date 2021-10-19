@@ -1,7 +1,7 @@
 <template >
 
 
-<body style=" overflow: hidden;" class="overflowing">
+<body style=" overflow: hidden; user-select: none;" class="overflowing">
   <!-- <div v-if="pressing" style="user-select: none; background-color: Crimson; " class="timer-ready"  >
     <h3 style="color: white;font-size:200%; margin-left: -40px" >Tiemr Ready</h3>
   </div> -->
@@ -184,7 +184,7 @@
         </div>
 
         <table v-if="totalCount !== 0"> 
-          <thead @click="csTimer()">
+          <thead >
             <tr>
               <th></th>
               <th>Time</th>
@@ -194,7 +194,7 @@
               <th>Delete</th>
             </tr>
           </thead>
-          <tbody  v-if="totalCount !== 0" >
+          <tbody  v-if="totalCount !== 0" @touchstart="startTimer()"  @touchend="stopTimer()" >
             <tr>
               <td><strong>Last</strong></td>
               <td>{{results[(results.length) -1].outcome}}</td>
@@ -206,7 +206,7 @@
               <td v-else></td>
               <td @click='deleteData((results.length) -1)' class="xMark">X</td>
             </tr>  
-            <tr @click="csTimer()" >
+            <tr>
               <td><strong>Best</strong></td>
               <td>{{bestTime}}</td>
               <td v-if="results.length>= 5">{{bestAO5}}</td>
