@@ -324,7 +324,7 @@
 
     </div>
     <div class="menu-timer" v-if="menu=== 'timer' && running " >
-      <div class="solving-now" @click="csTimer()" >
+      <div class="solving-now" @touchstart="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
       </div>
     </div>
