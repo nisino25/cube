@@ -1,14 +1,17 @@
-<template>
-
+<template >
 
 
 <body style=" overflow: hidden;" class="overflowing">
-  <div class="wrapper">
+  <!-- <div v-if="pressing" style="user-select: none; background-color: Crimson; " class="timer-ready"  >
+    <h3 style="color: white;font-size:200%; margin-left: -40px" >Tiemr Ready</h3>
+  </div> -->
+
+  <div class="wrapper"   :style="[ isTimerRunning? {backgroundColor: Crimson} : '']" >
 
     <div class="menu-nav">
       <nav>
         <button class="menu-btn" @click="menu='timer'">Timer</button>
-        <button class="menu-btn" @click="menu='stats', getTheAverage()">Stats</button>
+        <button class="menu-btn" @click="menu='stats', getTheAverage()">Stats</button> 
         <button class="menu-btn" @click="menu='settings'">Settings</button>
         <!-- <button class="menu-btn" @click="addRandomData()">Settings</button> -->
       </nav>
@@ -151,7 +154,7 @@
       </div>
 
 
-      <div class="timer" v-if="!running"  >
+      <div class="timer" v-if="!running" style="user-select: none" >
         <div class="display">
           <!-- <a class="button-one" title="Relevant Title" href="#">Click Me</a><a class="button-two" title="Relevant Title" href="#">No Click Me</a> -->
           <div class='timer-buttons' >
@@ -159,7 +162,9 @@
             <button class="timer-menu" @click="whichInput = 'typing'">Typing</button> -->
           </div>
           <div class="random-algorithm" style="textAlgin:center">
-            <span @click="csTimer()" >{{randomAlg}}</span>
+            <!-- <span @click="csTimer()" >{{randomAlg}}</span> -->
+            <span @touchstart="startTimer()"  @touchend="stopTimer()"   >{{randomAlg}}</span>
+             
             <button class="shuffle" @click="algShuffle()">Shuffle</button>
           </div>
 
@@ -170,7 +175,7 @@
           </div>
           <div v-else>
             <div id="clock">
-              <span class="actual-timer" @click="csTimer()"   v-if="!running" >{{ time }}</span>
+              <span class="actual-timer" @touchstart="startTimer()"  @touchend="stopTimer()"   v-if="!running" >{{ time }}</span>
               
 
             </div>
@@ -406,7 +411,7 @@
           
           >
         </vue-frappe>
-        <button class="shuffle">Show Last 2k</button>
+        <button class="shuffle">Show Last 1k</button>
 
       </div>
       
@@ -424,6 +429,13 @@
             <label for="field1"><span>Weekly Goal <span class="required">*</span></span><input type="number" class="input-field" name="field1" v-model="weeklyGoal" /></label>
             <label for="field1"><span>Total Goal<span class="required">*</span></span><input type="number" class="input-field" name="field1" v-model="totalGoal" /></label>
 
+            <hr>
+            <label for="field1"><span @click="console.log('hey')">Upload data<span class="required">*</span></span><input type="number" class="input-field" name="field1" v-model="totalGoal" /></label>
+           
+
+            <!-- <button>Upload my data to cloud</button> -->
+
+            <!-- <button @click="addRandomData(10)">get 5ksolves</button> -->
             <!-- <label><span > </span><input class="menu-btn" style="marginTop:5%"  type="submit" value="Update" /></label> -->
           </form>
         </div>
@@ -556,9 +568,14 @@
 
 </body>
 
+
+
 </template>
 
 <script>
+// import db from './db';
+// import firebase from 'firebase/app';
+import 'firebase/firestore';
 
 var moment = require('moment'); // require
 moment().format(); 
@@ -572,6 +589,11 @@ export default {
 
   data(){
     return{
+      settingUptimer: undefined,
+      pressing :false,
+      isTimerRunning: false,
+      Crimson: 'Crimson',
+      
       chartData: [
         {
           name: "AO25", chartType: 'line',
@@ -580,6 +602,7 @@ export default {
           ],
         }
       ],
+      TimerReady: false,
       smallBoxData:[
         {
           name: "AO25", chartType: 'line',
@@ -694,6 +717,48 @@ export default {
   },
 
   methods:{
+    startTimer() {
+      this.pressing = true
+      // this.isTimerRunning = true
+
+      setTimeout(() =>{
+        this.toggleSwitch()
+      },1000)
+    },
+
+    toggleSwitch(){
+      if(this.pressing){
+        console.log('ready to start timer')
+        this.isTimerRunning = true
+      }else{
+        console.log('not longe nough')
+      }
+    },
+
+    stopTimer(){
+      this.pressing = false
+
+      // this.isTimerRunning = false
+      if(this.isTimerRunning){
+        this.csTimer()
+      }else{
+        //
+      }
+
+      this.isTimerRunning = false
+    },
+
+    // touchend() {
+    //     //stops short touches from firing the event
+    //     if (timer){
+    //       clearTimeout(timer); // clearTimeout, not cleartimeout..
+    //     }
+    // },
+
+    consoleTouch(){
+      console.log(`Touching: ${this.touching}`)
+    },
+
 
     getRandomInt () {
       return Math.floor(Math.random() * (50 - 5 + 1)) + 5
@@ -1085,7 +1150,6 @@ export default {
       // console.log(this.WholeDataOfOutcome)
     },
 
-
     csTimer(){
       if(this.running){
         this.running = false;
@@ -1214,11 +1278,12 @@ export default {
     upTest(){
       console.log('up')
     },
-    addRandomData(){
-      let randomNum = Math.random;
+    addRandomData(num){
+      console.log('getting random data')
+      let randomNum = Math.random();
       let i =0
       randomNum = randomNum * 30;
-      while(i<1000){
+      while(i<num){
         randomNum = Math.random();
         randomNum = randomNum * 20;
         randomNum = parseFloat(randomNum.toFixed(2))
@@ -1350,13 +1415,33 @@ export default {
         i++;
         iii = iii + 0.0025
       }
+
       
       
+      
+      
+
+    },
+
+    getChartFor1k(){
+      let i = 0;
+      let iii = -1
+
+      while(i< 499){
+        this.chartData[0].values.unshift(this.AO25Data[this.AO25Data.length-iii])
+        iii = iii-2
+        i++
+      }
+
+      if(this.chartData[0].values.length > 400){
+        this.chartData[0].values.pop()
+      }
 
     },
     
 
   },
+
   created() {
     // console.log('created called.');
     // this.results = []
@@ -1510,11 +1595,22 @@ export default {
       this.totalGoal = parseInt(this.totalGoal)
       this.goalData.total = this.totalGoal
       localStorage.goalData = JSON.stringify(this.goalData);
-    }
+    },
+    settingUptimer: function(){
+      console.log(this.settingUptimer)
+    },
+    
 
   
   },
   computed:{
+    currentColor: function (){
+      if(this.TimerReady){
+        return 'red'
+      }else{
+        return ''
+      }
+    },
     textLength(){
       return this.message.length;
     },
@@ -1668,6 +1764,27 @@ export default {
 </script>
 
 <style>
+.timer-ready{
+  width: 100%; height: 100%; margin: 0em;
+  left: 0em; top: 0em; background: black;
+  position: fixed;
+}
+
+.timer-ready h3{
+  width: 100px;
+  height: 100px;
+  /* Center vertically and horizontally */
+  position: absolute;
+  /* padding: 100px ; */
+
+  top: 50%;
+  left: 50%;
+  margin: -25px 0 0 -25px;
+}
+
+
+
+
  .line-vertical {
     display: none;
 }
