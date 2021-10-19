@@ -173,11 +173,10 @@
               <input type="number" step="0.01" v-model="currentTime"  placeholder="Enter your time">
             </form>
           </div>
+
           <div v-else>
             <div id="clock">
               <span class="actual-timer" @touchstart="startTimer()"  @touchend="stopTimer()"   v-if="!running" >{{ time }}</span>
-              
-
             </div>
 
           </div>
@@ -219,7 +218,7 @@
         </table>
 
 
-        <div class="stats" @click="csTimer()">
+        <div class="stats" @touch="csTimer()">
 
 
           <hr class="counter-left">
@@ -325,7 +324,7 @@
 
     </div>
     <div class="menu-timer" v-if="menu=== 'timer' && running " >
-      <div class="solving-now" @click="csTimer()" @hover="csTimer()" >
+      <div class="solving-now" @click="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
       </div>
     </div>
@@ -722,18 +721,19 @@ export default {
       // this.isTimerRunning = true
 
       setTimeout(() =>{
-        this.toggleSwitch()
-      },1000)
-    },
-
-    toggleSwitch(){
-      if(this.pressing){
+        if(this.pressing){
         console.log('ready to start timer')
         this.isTimerRunning = true
       }else{
         console.log('not longe nough')
-      }
+        this.isTimerRunning = false
+      } 
+      },1000)
     },
+
+    // toggleSwitch(){
+      
+    // },
 
     stopTimer(){
       this.pressing = false
@@ -746,17 +746,6 @@ export default {
       }
 
       this.isTimerRunning = false
-    },
-
-    // touchend() {
-    //     //stops short touches from firing the event
-    //     if (timer){
-    //       clearTimeout(timer); // clearTimeout, not cleartimeout..
-    //     }
-    // },
-
-    consoleTouch(){
-      console.log(`Touching: ${this.touching}`)
     },
 
 
