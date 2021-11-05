@@ -365,7 +365,7 @@
           </tbody> -->
 
           <tbody v-for="(result, i) in resultsForOneK" :key="i" >
-            <tr v-if="results.length - i <= showingIndex">
+            <tr >
               <td><strong>{{results.length - i}} </strong></td>
               <td>{{result.outcome}}</td>
               <td v-if="results.length - i>4">{{AO5Data[results.length - i -1]}}</td>
@@ -1728,11 +1728,11 @@ export default {
     resultsForOneK(){
       let list = []
       let lastIndex = this.results.length-1
-      if(this.results.length <= 500){
+      if(this.results.length <= 100){
         return this.results
       }else{
         let count =0
-        while(count < 500){
+        while(count < 100){
           list.push(this.results[lastIndex-count])
           count++
         }
