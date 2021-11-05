@@ -728,7 +728,7 @@ export default {
         console.log('not longe nough')
         this.isTimerRunning = false
       } 
-      },1000)
+      },750)
     },
 
     // toggleSwitch(){
