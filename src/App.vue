@@ -350,7 +350,7 @@
             </tr>
           </thead>
 
-          <tbody v-for="(result, i) in results" :key="i" >
+          <!-- <tbody v-for="(result, i) in results" :key="i" >
             <tr v-if="results.length - i <= showingIndex">
               <td><strong>{{results.length - i}} </strong></td>
               <td>{{results[(results.length - i) -1].outcome}}</td>
@@ -359,6 +359,20 @@
               <td v-if="results.length -i>11">{{AO12Data[results.length - i -1]}}</td>
               <td v-else></td>
               <td v-if="results.length -i>99">{{AO100Data[results.length - i -1]}}</td>
+              <td v-else></td>
+              <td @click='deleteData((results.length - i) -1)' class="xMark">X</td>
+            </tr>  
+          </tbody> -->
+
+          <tbody v-for="(result, i) in resultsForOneK" :key="i" >
+            <tr v-if="results.length - i <= showingIndex">
+              <td><strong>{{results.length - i}} </strong></td>
+              <td>{{result.outcome}}</td>
+              <td v-if="results.length - i>4">{{AO5Data[results.length - i -1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length - i>11">{{AO12Data[results.length - i -1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length - i>99">{{AO100Data[results.length - i -1]}}</td>
               <td v-else></td>
               <td @click='deleteData((results.length - i) -1)' class="xMark">X</td>
             </tr>  
@@ -716,6 +730,7 @@ export default {
   },
 
   methods:{
+
     startTimer() {
       this.pressing = true
       // this.isTimerRunning = true
@@ -1283,23 +1298,6 @@ export default {
       }
       console.log(this.results)
 
-      // this.running = false;
-      //   this.timeStopped = new Date();
-      //   clearInterval(this.started);
-        
-      //   this.results.push({time: Date.now(),outcome: Number(this.time) });
-      //   // this.currentTime = null
-
-      //   this.sessionCount++;
-      //   this.dailyCount++;
-      //   this.weeklyCount++
-      //   this.updateAO(); 
-      //   this.totalCount = this.results.length;
-      //   this.getTheBest();
-      //   this.algShuffle();
-      //   // localStorage.results = this.results;
-      //   console.log('updating')
-
 
 
     },
@@ -1432,18 +1430,12 @@ export default {
   },
 
   created() {
-    // console.log('created called.');
-    // this.results = []
-
 
     this.updateAO();
     this.algShuffle();
 
     
     
-
-
-    // this.reverseRe sults = this.results.reverse()
   },
   mounted() {
     if (localStorage.results) {
@@ -1556,6 +1548,10 @@ export default {
         this.totalGoal = this.goalData.total
       }
     }
+    console.log(this.results.length) 
+
+    // this.addRandomData(1000)
+    console.log(this.results.length)
 
 
     
@@ -1727,6 +1723,22 @@ export default {
         "border": "5px solid red",
         "width": width + '%'
       }
+    },
+    
+    resultsForOneK(){
+      let list = []
+      let lastIndex = this.results.length-1
+      if(this.results.length <= 500){
+        return this.results
+      }else{
+        let count =0
+        while(count < 500){
+          list.push(this.results[lastIndex-count])
+          count++
+        }
+      }
+
+      return list
     },
 
     
