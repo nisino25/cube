@@ -155,75 +155,13 @@
 
 
       <div class="timer" v-if="!running" style="user-select: none" >
+        
+
         <div class="display">
-          <!-- <a class="button-one" title="Relevant Title" href="#">Click Me</a><a class="button-two" title="Relevant Title" href="#">No Click Me</a> -->
-          <div class='timer-buttons' >
-            <!-- <button class="timer-menu" @click="whichInput = 'default'">Default</button>
-            <button class="timer-menu" @click="whichInput = 'typing'">Typing</button> -->
-          </div>
-          <div class="random-algorithm" style="textAlgin:center">
-            <!-- <span @click="csTimer()" >{{randomAlg}}</span> -->
-            <span @touchstart="startTimer()"  @touchend="stopTimer()"   >{{randomAlg}}</span>
-             
-            <button class="shuffle" @click="algShuffle()">Shuffle</button>
-          </div>
-
-          <div v-if="whichInput === 'typing'">
-            <form v-on:submit.prevent="inputTime()" >
-              <input type="number" step="0.01" v-model="currentTime"  placeholder="Enter your time">
-            </form>
-          </div>
-
-          <div v-else>
-            <div id="clock">
-              <span class="actual-timer" @touchstart="startTimer()"  @touchend="stopTimer()"   v-if="!running" >{{ time }}</span>
-            </div>
-
-          </div>
-
-        </div>
-
-        <table v-if="totalCount !== 0"> 
-          <thead >
-            <tr>
-              <th></th>
-              <th>Time</th>
-              <th>AO5</th>
-              <th>AO12</th>
-              <th>AO100</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody  v-if="totalCount !== 0" @touchstart="startTimer()"  @touchend="stopTimer()" >
-            <tr>
-              <td><strong>Last</strong></td>
-              <td>{{results[(results.length) -1].outcome}}</td>
-              <td v-if="results.length>=5">{{AO5Data[results.length - 1]}}</td>
-              <td v-else></td>
-              <td v-if="results.length>=12">{{AO12Data[results.length - 1]}}</td>
-              <td v-else></td>
-              <td v-if="results.length>=100">{{AO100Data[results.length - 1]}}</td>
-              <td v-else></td>
-              <td @click='deleteData((results.length) -1)' class="xMark">X</td>
-            </tr>  
-            <tr>
-              <td><strong>Best</strong></td>
-              <td>{{bestTime}}</td>
-              <td v-if="results.length>= 5">{{bestAO5}}</td>
-              <td v-if="results.length>= 12"> {{bestAO12}}</td>
-              <td v-if="results.length>= 100">{{bestAO100}}</td>
-            </tr>  
-
-          </tbody>
-        </table>
+          <div class="stats" @touch="csTimer()">
 
 
-        <div class="stats" @touch="csTimer()">
-
-
-          <hr class="counter-left">
-          <span class="counter-label">Counter</span>
-          <hr class="counter-right">
+          
 
           <div  class="session-goal">
               <!-- 右側の180度分の領域 -->
@@ -319,10 +257,92 @@
 
           </div>
           
+          </div>
+          
+          <!-- <a class="button-one" title="Relevant Title" href="#">Click Me</a><a class="button-two" title="Relevant Title" href="#">No Click Me</a> -->
+          
+          <div class="random-algorithm" style="textAlgin:center">
+            <!-- <span @click="csTimer()" >{{randomAlg}}</span> -->
+            <span @touchstart="startTimer()"  @touchend="stopTimer()"   >{{randomAlg}}</span>
+             
+            <button class="shuffle" @click="algShuffle()">Shuffle</button>
+          </div>
+
+          
+
+          <div style="">
+            
+            <div id="clock" style="top: 50%;"> 
+              <hr style=""> 
+              <div style="">
+              <!-- <hr class="counter-left">
+              <span class="counter-label">Counter</span>
+              <hr class="counter-right">  -->
+              
+              </div>
+              <span class="actual-timer" @touchstart="startTimer()"  @touchend="stopTimer()"   v-if="!running" >{{ time }}</span>
+            </div>
+
+          </div>
+
         </div>
+        
+
+        <table v-if="totalCount !== 0" style="top: 25%"> 
+          <thead >
+            <tr>
+              <th></th>
+              <th>Time</th>
+              <th>AO5</th>
+              <th>AO12</th>
+              <th>AO100</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody  v-if="totalCount !== 0" @touchstart="startTimer()"  @touchend="stopTimer()" >
+            <tr>
+              <td><strong>Last</strong></td>
+              <td>{{results[(results.length) -1].outcome}}</td>
+              <td v-if="results.length>=5">{{AO5Data[results.length - 1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=12">{{AO12Data[results.length - 1]}}</td>
+              <td v-else></td>
+              <td v-if="results.length>=100">{{AO100Data[results.length - 1]}}</td>
+              <td v-else></td>
+              <td @click='deleteData((results.length) -1)' class="xMark">X</td>
+            </tr>  
+            <tr>
+              <td><strong>Best</strong></td>
+              <td>{{bestTime}}</td>
+              <td v-if="results.length>= 5">{{bestAO5}}</td>
+              <td v-if="results.length>= 12"> {{bestAO12}}</td>
+              <td v-if="results.length>= 100">{{bestAO100}}</td>
+            </tr>  
+
+          </tbody>
+        </table>
+        
+        <!-- <div style="">
+         <hr class="counter-left">
+          <span class="counter-label">Counter</span>
+          <hr class="counter-right"> -->
+      <!-- </div> -->
+      
+
+
+        
       </div>
+      
 
     </div>
+
+    
+
+
+
+
+
+
     <div class="menu-timer" v-if="menu=== 'timer' && running " >
       <div class="solving-now" @touchstart="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
@@ -458,7 +478,9 @@
 
           <hr class="counter-left-settings">
           <span class="counter-label-settings">Counter</span>
-          <hr class="counter-right-settings">
+          <hr 
+          
+          class="counter-right-settings">
             <div  class="session-goal">
                 <!-- 右側の180度分の領域 -->
                 <div class="square" style="right:0">
@@ -1866,6 +1888,7 @@ body {
 
   bottom: 0;
   height: 25%;
+  top: 0;
   /* background-color: white; */
   /* width: 60em; */
   /* border: solid 1px black; */
@@ -2169,6 +2192,7 @@ table td{
 
 .random-algorithm{
   position: absolute;
+  top: 55%;
   left: 0;
   right: 0;
   text-align: center;
@@ -2231,9 +2255,22 @@ table td{
   order: 0;
   flex: 0 1 auto;
   align-self: center;
+  margin-top: 225px;
+  /* position: absolute; */
+  /* bottom: 0; */
 
   color: black;
   /* //text-shadow: 0px 0px 25px $color; */
+}
+
+#clock hr{
+  height: 1px;
+  /* background-color: dimgray; */
+  background-color:black;
+  border: none;
+  margin-top: -20px;
+  width: 90%;
+    
 }
 
 
