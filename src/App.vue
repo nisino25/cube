@@ -473,7 +473,7 @@
           </form>
         </div>
       </div>
-      <div class="stats-settings">
+      <div class="stats-settings" v-if="menu=== 'timer'">
 
 
           <hr class="counter-left-settings">
