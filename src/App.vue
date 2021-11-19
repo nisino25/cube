@@ -1,4 +1,7 @@
 <template >
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+</head>
 
 
 <body style=" overflow: hidden; user-select: none;" class="overflowing">
@@ -122,8 +125,12 @@
       </div>
 
       <div class="graph-chart" v-if="smallBox === 'chart' ">
-        <div class="AwesomeChart" v-if="results.length >= 125 ">
-          <span class="showing-label">Showing Last 100 of AO25</span>
+        <div class="AwesomeChart" v-if="results.length >= 15 " >
+           <a class="notion-link notion-breadcrumb__item single"  style="font-size: 75%; margin-left:20px; margin-top:20px">
+        <i class="far fa-eye" id="togglePassword" style="margin-right: 3px; cursor: pointer;"></i>
+        {{userNum}} Views
+      </a>
+          <span class="showing-label" style="font-size:75%">Showing Last 100 of AO25</span>
           <button class="table-button" @click="smallBox = 'table', whichStats = 'table'">Table</button>
           <vue-frappe
           class="small-chart"
@@ -336,12 +343,6 @@
 
     </div>
 
-    
-
-
-
-
-
 
     <div class="menu-timer" v-if="menu=== 'timer' && running " >
       <div class="solving-now" @touchstart="csTimer()" >
@@ -453,6 +454,7 @@
 
 
     <div class="menu-setting" v-if="menu==='settings'">
+
       <div class="settings" v-if="!showingPastAlgs">
         <div class="form-style-2" >
           <div class="form-style-2-heading">Change your goals</div>
@@ -582,6 +584,7 @@
       <div class="refresh">
         <button @click='refreshAO()'>Refresh AO</button>&nbsp;
         <button @click='showingPastAlgs = !showingPastAlgs'>Show the algs</button>&nbsp;
+        <button @click='getDetail()'>Detailed data</button>&nbsp;&nbsp;
 
         <button @click="clearTheLocal()" >X</button>
       </div>
@@ -590,6 +593,16 @@
         <br>
         <li v-for="(i, algs ) in pastAlgs" :key="algs">{{i}} <br><br> </li>
         
+      </div>
+
+      <div style="position: absolute; bottom: 20%;">
+        <a class="notion-link notion-breadcrumb__item single" >
+        
+        <i class="far fa-eye" id="togglePassword" style="margin-right: 7px; cursor: pointer;"></i>
+        {{userNum}} Views
+        <!-- <vue3-autocounter class="counter" ref='counter' :startAmount='0'  suffix=' Views' :endAmount="userNum" :duration='1.5'  separator=',' :autoinit='true' /> -->
+        
+       </a>
       </div>
 
     </div>
@@ -608,22 +621,30 @@
 </template>
 
 <script>
-// import db from './db';
-// import firebase from 'firebase/app';
-import 'firebase/firestore';
 
 var moment = require('moment'); // require
 moment().format(); 
 var soundStart = new Audio(`/audio/263133__pan14__tone-beep.m4a`);
 import { VueFrappe } from 'vue2-frappe'
 
+// import Vue3autocounter from 'vue3-autocounter';
+import db from "./firebase.js"
+
 export default {
   components: {
     VueFrappe,
+    // 'vue/3-autocounter': Vue3autocounter,
   },
+  
 
   data(){
     return{
+      fireData:[],
+      userNum: 0,
+
+
+      showingDetail: false,
+      detailList: [],
       settingUptimer: undefined,
       pressing :false,
       isTimerRunning: false,
@@ -752,6 +773,16 @@ export default {
   },
 
   methods:{
+    getDetail(){
+      if(this.showingDetail) this.showingDetail = false
+
+      this.showingDetail = true
+      this.detailList = []
+      // let count = 0;
+
+
+
+    },
 
     startTimer() {
       this.pressing = true
@@ -1456,6 +1487,18 @@ export default {
     this.updateAO();
     this.algShuffle();
 
+    db.collection("nisino25-cube")
+     .get()
+     .then((querySnapshot) => {
+       querySnapshot.forEach((doc) => {
+         console.log(`${doc.id} => ${doc.data().TotalNum}`)
+         this.fireData.push(doc.data().TotalNum)
+         this.userNum = doc.data().TotalNum + 1
+       })
+     })
+
+    //  this.addRandomData(100)
+
     
     
   },
@@ -1605,6 +1648,15 @@ export default {
     },
     settingUptimer: function(){
       console.log(this.settingUptimer)
+    },
+    userNum(){
+      console.log('just ogt data')
+        const ref = db.collection('nisino25-cube')
+        ref.doc('8CKObNnyitQVBrRvt342').update({
+          TotalNum: this.userNum
+          // TotalNum: 200 
+        })
+      console.log('Sent data now')
     },
     
 
@@ -1888,7 +1940,7 @@ body {
 
   bottom: 0;
   height: 25%;
-  top: 5%;
+  top: 4%;
   /* background-color: white; */
   /* width: 60em; */
   /* border: solid 1px black; */
