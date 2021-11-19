@@ -1888,7 +1888,7 @@ body {
 
   bottom: 0;
   height: 25%;
-  top: 0;
+  top: 5%;
   /* background-color: white; */
   /* width: 60em; */
   /* border: solid 1px black; */
@@ -2268,7 +2268,7 @@ table td{
   /* background-color: dimgray; */
   background-color:black;
   border: none;
-  margin-top: -20px;
+  margin-top: -50px;
   width: 90%;
     
 }
