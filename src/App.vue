@@ -462,7 +462,8 @@
       <div v-if="showingDetail" style="margin-top:20px">
         <button @click="showingDetail = false" style="margin-left:10%">Change back</button>&nbsp;
         <input type="number" class="input-field" name="field1" v-model="Maxnum" style="width: 10%" />&nbsp;
-        <button @click="getDetail()">Update</button>
+        <button @click="getDetail()">Update</button>&nbsp;
+        <button @click="getEverything()">Max</button>
         <br>
         <!-- {{detailedList}} -->
         <table  style="overflow:visible; width: 80%; text-align:center; margin-left: 10%;margin-top:10px">
@@ -908,6 +909,10 @@ export default {
     getTheMax(){
       this.Maxnum = 1000
       if(this.results.length < this.Maxnum) this.Maxnum =this.results.length
+    },
+    getEverything(){
+      this.Maxnum = this.results.length
+      this.getDetail();
     },
     startTimer() {
       this.pressing = true
