@@ -476,7 +476,7 @@
               </tr>
             </thead>
             <tbody  v-for="(result, i) in detailedList" :key="i">
-              <template v-if="(i >= firstDetail ) && (i !== 20) &&i !== 21 && i !== 22 &&i !== 23 &&i !== 24 &&i !== 25&&i !== 26&&i !== 27&&i !== 28&&i !== 29&&i !== 21">
+              <template v-if="i >= firstDetail ">
               <tr>
                 <td v-if="i == 30"><strong>30+ </strong></td>
                 <td v-else><strong>{{i}}s </strong></td>
@@ -851,7 +851,7 @@ export default {
 
         if(theTime >= 30){
           this.detailedList[30] = {
-            count: this.detailedList[30].count++,
+            count: this.detailedList[30].count + 1,
             portion: 0,
           }
         }else{
