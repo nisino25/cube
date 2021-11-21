@@ -289,7 +289,17 @@
               <hr class="counter-right">  -->
               
               </div>
-              <span class="actual-timer" @touchstart="startTimer()"  @touchend="stopTimer()"   v-if="!running" >{{ time }}</span>
+              <span class="actual-timer" @touchstart="startTimer()"  @touchend="stopTimer()"   v-if="!running" >
+                <template v-if="time == '0.00'">
+                  {{ time }}
+                </template>
+                <template v-else-if="time - time.toFixed(2) == time">
+                  {{time}}.0
+                </template>
+                <template v-else>
+                {{time}}
+                </template>
+              </span>
             </div>
 
           </div>
@@ -345,7 +355,7 @@
 
     </div>
 
-
+<!-- ----------------------------------------- -->
     <div class="menu-timer" v-if="menu=== 'timer' && running " >
       <div class="solving-now" @touchstart="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
@@ -776,7 +786,7 @@ export default {
       },
       
 
-      time: '0.000',
+      time: '0.00',
       timeBegan: null,
       timeStopped: null,
       stoppedDuration: 0,
@@ -1317,6 +1327,8 @@ export default {
       localStorage.AO12 = JSON.stringify(this.AO12Data)
       localStorage.AO100 = JSON.stringify(this.AO100Data)
       localStorage.AO25 = JSON.stringify(this.AO25Data)
+
+      this.time = '0.00'
 
 
     },
