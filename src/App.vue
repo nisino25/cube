@@ -1,8 +1,8 @@
 <template >
+
 <head>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
 </head>
-
 
 <body style=" overflow: hidden; user-select: none;" class="overflowing">
   <!-- <div v-if="pressing" style="user-select: none; background-color: Crimson; " class="timer-ready"  >
@@ -15,7 +15,7 @@
       <nav>
         <button class="menu-btn" @click="menu='timer'">Timer</button>
         <button class="menu-btn" @click="menu='stats', getTheAverage()">Stats</button> 
-        <button class="menu-btn" @click="menu='settings'">Settings</button>
+        <button class="menu-btn" @click="menu='settings'; getDetail()">Settings</button>
         <!-- <button class="menu-btn" @click="addRandomData()">Settings</button> -->
       </nav>
       
@@ -128,6 +128,7 @@
         <div class="AwesomeChart" v-if="results.length >= 15 " >
            <a class="notion-link notion-breadcrumb__item single"  style="font-size: 75%; margin-left:20px; margin-top:20px">
         <i class="far fa-eye" id="togglePassword" style="margin-right: 3px; cursor: pointer;"></i>
+        
         {{userNum}} Views
       </a>
           <span class="showing-label" style="font-size:75%">Showing Last 100 of AO25</span>
@@ -453,8 +454,40 @@
     </div>
 
 
+    <!-- ----------------------------------------- -->
+
     <div class="menu-setting" v-if="menu==='settings'">
 
+      <div v-if="showingDetail" style="margin-top:20px">
+        <button @click="showingDetail = false" style="text-align:center">Change back</button>
+        <br>
+        <!-- {{detailedList}} -->
+        <table  style="overflow:visible; width: 80%; text-align:center; margin-left: 10%;margin-top:10px">
+          
+            <thead>
+              <tr>
+                <th style="width:15%">Time</th>
+                <th>Count</th>
+                <th>%</th>
+              </tr>
+            </thead>
+            <tbody  v-for="(result, i) in detailedList" :key="i">
+              <template v-if="i >= firstDetail && i <= lastDetail">
+              <tr>
+                <td><strong>{{i}}s </strong></td>
+                <td>{{result.count}}</td>
+                <td v-if="result.portion == 0">0 %</td>
+                <td v-else>{{result.portion}} %</td>
+              </tr>  
+          </template>
+            </tbody>
+          
+
+        </table>
+        
+      </div>
+
+      <div v-else>
       <div class="settings" v-if="!showingPastAlgs">
         <div class="form-style-2" >
           <div class="form-style-2-heading">Change your goals</div>
@@ -584,11 +617,13 @@
       <div class="refresh">
         <button @click='refreshAO()'>Refresh AO</button>&nbsp;
         <button @click='showingPastAlgs = !showingPastAlgs'>Show the algs</button>&nbsp;
-        <button @click='getDetail()'>Detailed data</button>&nbsp;&nbsp;
-
+        <button @click='getDetail()'>Detailed data</button>&nbsp;
         <button @click="clearTheLocal()" >X</button>
       </div>
 
+      
+
+      
       <div v-if="showingPastAlgs">
         <br>
         <li v-for="(i, algs ) in pastAlgs" :key="algs">{{i}} <br><br> </li>
@@ -602,8 +637,15 @@
         {{userNum}} Views
         <!-- <vue3-autocounter class="counter" ref='counter' :startAmount='0'  suffix=' Views' :endAmount="userNum" :duration='1.5'  separator=',' :autoinit='true' /> -->
         
-       </a>
+      </a>
       </div>
+
+      </div>
+
+
+      
+
+      
 
     </div>
 
@@ -615,8 +657,6 @@
   </div>
 
 </body>
-
-
 
 </template>
 
@@ -644,7 +684,11 @@ export default {
 
 
       showingDetail: false,
-      detailList: [],
+      detailedList: [],
+      firstDetail: undefined,
+      lastDetail: undefined,
+      Maxnum: undefined,
+
       settingUptimer: undefined,
       pressing :false,
       isTimerRunning: false,
@@ -777,8 +821,82 @@ export default {
       if(this.showingDetail) this.showingDetail = false
 
       this.showingDetail = true
-      this.detailList = []
-      // let count = 0;
+      this.detailedList = []
+
+      // clear the list 
+      let count = 0
+      while(count < 31){
+        this.detailedList.push({count: 0, portion: 0})
+        count++ 
+      } 
+      // console.log(this.detailedList)
+
+      // with last 2500 solves
+
+      count = 0;
+      let theTime = undefined;
+      let resultIndex = this.results.length -1
+      this.Maxnum = 2500
+      if(this.results.length) this.Maxnum =this.results.length
+
+      while(count < this.Maxnum){
+        // console.log(this.results[resultIndex - count])
+        theTime = Math.floor(this.results[resultIndex - count].outcome)
+        // console.log(theTime)
+
+        if(theTime >= 30){
+          this.detailedList[30] = {
+            count: this.detailedList[30].count++,
+            portion: 0,
+          }
+        }else{
+          this.detailedList[theTime] ={
+            // count: this.detailedList[theTime].count++,
+            count: this.detailedList[theTime].count + 1 ,
+            portion: 0,
+          }
+        }
+
+        
+        count++
+      }
+      console.log(this.detailedList)
+      console.log(this.results)
+
+      count = 0
+      let firstDone = false
+      // let lastDone = Maxnum
+
+      while(count < 31){
+        // this.detailedList.push({count: 0, portion: 0})
+        if(!firstDone && this.detailedList[count].count!== 0){
+          this.firstDetail = count;
+          firstDone = true
+        }
+
+        if(this.detailedList[count].count!== 0) this.lastDetail = count
+
+        // let thePortion = undefined
+
+
+        
+        count++ 
+      } 
+      count =0 
+      while(count < 31){
+        console.log(`${this.detailedList[count].count}/ ${this.Maxnum}`)
+        let thePortion =  (this.detailedList[count].count / this.Maxnum) * 100
+        this.detailedList[count].portion = thePortion.toFixed(2)
+
+
+        
+        count++ 
+      } 
+
+
+
+      
+      
 
 
 
@@ -1491,11 +1609,13 @@ export default {
      .get()
      .then((querySnapshot) => {
        querySnapshot.forEach((doc) => {
-         console.log(`${doc.id} => ${doc.data().TotalNum}`)
+        //  console.log(`${doc.id} => ${doc.data().TotalNum}`)
          this.fireData.push(doc.data().TotalNum)
          this.userNum = doc.data().TotalNum + 1
        })
      })
+
+
 
     //  this.addRandomData(100)
 
@@ -1613,7 +1733,7 @@ export default {
         this.totalGoal = this.goalData.total
       }
     }
-    console.log(this.results.length) 
+    // console.log(this.results.length) 
 
     // this.addRandomData(1000)
     console.log(this.results.length)
@@ -1650,13 +1770,13 @@ export default {
       console.log(this.settingUptimer)
     },
     userNum(){
-      console.log('just ogt data')
+      // console.log('just ogt data')
         const ref = db.collection('nisino25-cube')
         ref.doc('8CKObNnyitQVBrRvt342').update({
           TotalNum: this.userNum
           // TotalNum: 200 
         })
-      console.log('Sent data now')
+      // console.log('Sent data now')
     },
     
 
