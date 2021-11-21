@@ -2,6 +2,7 @@
 
 <head>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 </head>
 
 <body style=" overflow: hidden; user-select: none;" class="overflowing">
@@ -15,7 +16,7 @@
       <nav>
         <button class="menu-btn" @click="menu='timer'">Timer</button>
         <button class="menu-btn" @click="menu='stats', getTheAverage()">Stats</button> 
-        <button class="menu-btn" @click="menu='settings'; getDetail()">Settings</button>
+        <button class="menu-btn" @click="menu='settings'">Settings</button>
         <!-- <button class="menu-btn" @click="addRandomData()">Settings</button> -->
       </nav>
       
@@ -459,7 +460,9 @@
     <div class="menu-setting" v-if="menu==='settings'">
 
       <div v-if="showingDetail" style="margin-top:20px">
-        <button @click="showingDetail = false" style="text-align:center">Change back</button>
+        <button @click="showingDetail = false" style="margin-left:10%">Change back</button>&nbsp;
+        <input type="number" class="input-field" name="field1" v-model="Maxnum" style="width: 10%" />&nbsp;
+        <button @click="getDetail()">Update</button>
         <br>
         <!-- {{detailedList}} -->
         <table  style="overflow:visible; width: 80%; text-align:center; margin-left: 10%;margin-top:10px">
@@ -836,8 +839,8 @@ export default {
       count = 0;
       let theTime = undefined;
       let resultIndex = this.results.length -1
-      this.Maxnum = 2500
-      if(this.results.length) this.Maxnum =this.results.length
+      // this.Maxnum = maximum
+      if(this.results.length < this.Maxnum) this.Maxnum =this.results.length
 
       while(count < this.Maxnum){
         // console.log(this.results[resultIndex - count])
