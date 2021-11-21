@@ -16,7 +16,7 @@
       <nav>
         <button class="menu-btn" @click="menu='timer'">Timer</button>
         <button class="menu-btn" @click="menu='stats', getTheAverage()">Stats</button> 
-        <button class="menu-btn" @click="menu='settings'">Settings</button>
+        <button class="menu-btn" @click="menu='settings'; getTheMax()">Settings</button>
         <!-- <button class="menu-btn" @click="addRandomData()">Settings</button> -->
       </nav>
       
@@ -475,9 +475,10 @@
               </tr>
             </thead>
             <tbody  v-for="(result, i) in detailedList" :key="i">
-              <template v-if="i >= firstDetail && i <= lastDetail">
+              <template v-if="(i >= firstDetail ) && (i !== 20) &&i !== 21 && i !== 22 &&i !== 23 &&i !== 24 &&i !== 25&&i !== 26&&i !== 27&&i !== 28&&i !== 29&&i !== 21">
               <tr>
-                <td><strong>{{i}}s </strong></td>
+                <td v-if="i == 30"><strong>30+ </strong></td>
+                <td v-else><strong>{{i}}s </strong></td>
                 <td>{{result.count}}</td>
                 <td v-if="result.portion == 0">0 %</td>
                 <td v-else>{{result.portion}} %</td>
@@ -904,7 +905,10 @@ export default {
 
 
     },
-
+    getTheMax(){
+      this.Maxnum = 1000
+      if(this.results.length < this.Maxnum) this.Maxnum =this.results.length
+    },
     startTimer() {
       this.pressing = true
       // this.isTimerRunning = true
