@@ -631,7 +631,7 @@
       </div>
       <div class="refresh">
         <button @click='refreshAO()'>Refresh AO</button>&nbsp;
-        <button @click='showingPastAlgs = !showingPastAlgs'>Show the algs</button>&nbsp;
+        <button @click='showingPastAlgs = !showingPastAlgs'>Show algs</button>&nbsp;
         <button @click='getDetail()'>Detailed data</button>&nbsp;
         <button @click="clearTheLocal()" >X</button>
       </div>
@@ -901,7 +901,7 @@ export default {
       while(count < 31){
         console.log(`${this.detailedList[count].count}/ ${this.Maxnum}`)
         let thePortion =  (this.detailedList[count].count / this.Maxnum) * 100
-        this.detailedList[count].portion = thePortion.toFixed(2)
+        this.detailedList[count].portion = thePortion.toFixed(3)
 
 
         
