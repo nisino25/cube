@@ -2083,7 +2083,7 @@ body {
   width: 100%;
 
   bottom: 0;
-  height: 25%;
+  height: 22.5%;
   top: 4%;
   /* background-color: white; */
   /* width: 60em; */
