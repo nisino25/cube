@@ -2,6 +2,7 @@
 
 <head>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 </head>
 
@@ -133,7 +134,7 @@
         {{userNum}} Views
         <br>
         <div style=" margin-left:25px;">
-          <span>{{showingTimer}}</span>
+          <i class="fa fa-clock-o" style="font-size:125%;margin-right:5px"></i><span>{{showingTimer}}</span>
         </div>
         
         
@@ -656,7 +657,6 @@
         
         <i class="far fa-eye" id="togglePassword" style="margin-right: 7px; cursor: pointer;"></i>
         {{userNum}} Views
-        <!-- <vue3-autocounter class="counter" ref='counter' :startAmount='0'  suffix=' Views' :endAmount="userNum" :duration='1.5'  separator=',' :autoinit='true' /> -->
         
       </a>
       </div>
@@ -831,9 +831,9 @@ export default {
       moreThanMinutes: false,
       countingUpTimer: 0,
       showingTimer: '00:00',
-      second: 56,
-      minute: 59,
-      hours: 1, 
+      second: 0,
+      minute: 0,
+      hours: 0, 
 
 
       
@@ -854,7 +854,7 @@ export default {
       // let theMaxSeconds = 60 * 60 * 2
       
 
-      if(this.hours < 3) {
+      if(this.hours < 2) {
         setTimeout(() => {
           this.second++
 
