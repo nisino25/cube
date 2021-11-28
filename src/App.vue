@@ -133,12 +133,15 @@
         
         {{userNum}} Views
         <br>
-        <div style=" margin-left:25px;">
+        <div style=" margin-left:20px;">
           <i class="fa fa-clock-o" style="font-size:125%;margin-right:5px"></i><span>{{showingTimer}}</span>
         </div>
         
         
       </a>
+      <div style="margin-top: -20px">
+
+      
           <span class="showing-label" style="font-size:75%">Showing Last 100 of AO25</span>
           <button class="table-button" @click="smallBox = 'table', whichStats = 'table'">Table</button>
           <vue-frappe
@@ -165,6 +168,7 @@
           
           >
         </vue-frappe>
+      </div>
 
       </div>
       </div>
