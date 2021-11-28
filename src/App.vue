@@ -131,6 +131,12 @@
         <i class="far fa-eye" id="togglePassword" style="margin-right: 3px; cursor: pointer;"></i>
         
         {{userNum}} Views
+        <br>
+        <div style=" margin-left:25px;">
+          <span>{{showingTimer}}</span>
+        </div>
+        
+        
       </a>
           <span class="showing-label" style="font-size:75%">Showing Last 100 of AO25</span>
           <button class="table-button" @click="smallBox = 'table', whichStats = 'table'">Table</button>
@@ -818,6 +824,17 @@ export default {
       averageOfSum: 0,
       smallAverage: 0,
 
+      countingUpSeconds: 0,
+      countingUpMinutes: 0,
+      countingUpHours: 0,
+      // moreThanSeconds: false,
+      moreThanMinutes: false,
+      countingUpTimer: 0,
+      showingTimer: '00:00',
+      second: 56,
+      minute: 59,
+      hours: 1, 
+
 
       
       
@@ -832,6 +849,71 @@ export default {
   },
 
   methods:{
+    startCounting(){
+      
+      // let theMaxSeconds = 60 * 60 * 2
+      
+
+      if(this.hours < 3) {
+        setTimeout(() => {
+          this.second++
+
+          if(this.second == 60){
+            this.second = 0
+            this.minute++
+          }
+
+
+          if(this.minute == 60){
+            this.minute =0
+            this.hours++ 
+          }
+
+          if(this.minute < 10){
+            this.showingTimer = `${this.hours}:0${this.minute}`
+          }else{
+            this.showingTimer = `${this.hours}:${this.minute}`
+          }
+
+
+          if(this.second < 10){
+            this.showingTimer = `${this.showingTimer}:0${this.second}`
+          }else{
+            this.showingTimer = `${this.showingTimer}:${this.second}`
+          }
+
+          // this.showingTimer = `${this.hours}:${this.minute}:${this.second}`
+          this.startCounting()
+        }, 1000)
+      }
+      // 
+      // for (let i = 1; i < theMaxSeconds; i++) {
+      //   setTimeout(function timer() {
+      //     console.log(i);
+      //     this.countingUpTimer = i
+      //   }, i * 1000);
+      //   // this.countingUpTimer = i
+      // }
+      // var i = 1;                  //  set your counter to 1
+
+      // function myLoop() {         //  create a loop function
+      //   setTimeout(function() {   //  call a 3s setTimeout when the loop is called
+      //     console.log('hello');   //  your code here
+      //     i++;                    //  increment the counter
+      //     if (i < 10) {           //  if the counter < 10, call the loop function
+      //       myLoop();             //  ..  again which will trigger another 
+      //     }                       //  ..  setTimeout()
+      //   }, 3000)
+      // }
+
+      // myLoop();   
+
+      
+    },
+
+
+
+    // ---------------------------------------
     getDetail(){
       if(this.showingDetail) this.showingDetail = false
 
@@ -1625,6 +1707,7 @@ export default {
   },
 
   created() {
+    this.startCounting()
 
     this.updateAO();
     this.algShuffle();
