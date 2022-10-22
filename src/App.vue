@@ -131,7 +131,7 @@
            <a class="notion-link notion-breadcrumb__item single"  style="font-size: 75%; margin-left:20px; margin-top:20px">
         <i class="far fa-eye" id="togglePassword" style="margin-right: 3px; cursor: pointer;"></i>
         
-        {{userNum}} Views
+        {{userNum}} Views 
         <br>
         <div style=" margin-left:20px;">
           <i class="fa fa-clock-o" style="font-size:125%;margin-right:5px"></i><span>{{showingTimer}}</span>
