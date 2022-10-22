@@ -2559,7 +2559,7 @@ table td{
 
 
 .actual-timer {
-  margin-top: 10%;
+  margin-top: 15%;
   position: absolute;
   font-size: 6em;
   margin-left: auto;
