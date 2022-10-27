@@ -283,7 +283,7 @@
           
           <div class="random-algorithm" style="textAlgin:center">
             <!-- <span @click="csTimer()" >{{randomAlg}}</span> -->
-            <span @touchstart="startTimer()"  @touchend="stopTimer()"   >{{randomAlg}}</span>
+            <span @touchstart="startTimer()"  @touchend="stopTimer()" >{{randomAlg}}</span>
              
             <button class="shuffle" @click="algShuffle()">Shuffle</button>
           </div>
@@ -2475,7 +2475,7 @@ table td{
 
 .random-algorithm{
   position: absolute;
-  top: 55%;
+  top: 51%;
   left: 0;
   right: 0;
   text-align: center;
