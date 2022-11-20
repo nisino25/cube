@@ -293,8 +293,8 @@
 
           <div style="">
             
-            <div id="clock" style="top: 50%;"> 
-              <hr style=""> 
+            <div id="clock" style="top: 55%;"> 
+              <!-- <hr style="">  -->
               <div style="">
               <!-- <hr class="counter-left">
               <span class="counter-label">Counter</span>
@@ -699,7 +699,6 @@ import db from "./firebase.js"
 export default {
   components: {
     VueFrappe,
-    // 'vue/3-autocounter': Vue3autocounter,
   },
   
 
@@ -2476,7 +2475,7 @@ table td{
 
 .random-algorithm{
   position: absolute;
-  top: 51%;
+  top: 40%;
   left: 0;
   right: 0;
   text-align: center;
