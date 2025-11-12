@@ -367,7 +367,7 @@
 
     </div>
 
-<!-- ----------------------------------------- -->
+  <!-- ----------------------------------------- -->
     <div class="menu-timer" v-if="menu=== 'timer' && running " >
       <div class="solving-now" @touchstart="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
@@ -2070,6 +2070,9 @@ export default {
 </script>
 
 <style>
+html{
+  background-color: #4fc08d;
+}
 .timer-ready{
   width: 100%; height: 100%; margin: 0em;
   left: 0em; top: 0em; background: black;
