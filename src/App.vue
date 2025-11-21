@@ -367,7 +367,7 @@
 
     </div>
 
-  <!-- ----------------------------------------- -->
+    <!-- ----------------------------------------- -->
     <div class="menu-timer" v-if="menu=== 'timer' && running " >
       <div class="solving-now" @touchstart="csTimer()" >
         <span class="solving-now-span"  >Solving</span>
@@ -515,7 +515,7 @@
       </div>
 
       <div v-else>
-      <div class="settings" v-if="!showingPastAlgs">
+      <div class="settings" v-if="!showAnalysis">
         <div class="form-style-2" >
           <div class="form-style-2-heading">Change your goals</div>
           <form action="" method="post">
@@ -526,6 +526,8 @@
 
             <hr>
             <label for="field1"><span @click="console.log('hey')">Upload data<span class="required">*</span></span><input type="number" class="input-field" name="field1" v-model="totalGoal" /></label>
+            <br>
+            <button @click="downloadResults()">Upload</button>
            
 
             <!-- <button>Upload my data to cloud</button> -->
@@ -643,18 +645,28 @@
       </div>
       <div class="refresh">
         <button @click='refreshAO()'>Refresh AO</button>&nbsp;
-        <button @click='showingPastAlgs = !showingPastAlgs'>Show algs</button>&nbsp;
+        <button @click='showList("algs")'>Show algs</button>&nbsp;
         <button @click='getDetail()'>Detailed data</button>&nbsp;
         <button @click="clearTheLocal()" >X</button>
+        <br>
+        <button @click="deleteFastest()">Delete the fastest one</button>
+        <button @click='showList("fast")'>Show the fastest ones</button>
       </div>
 
       
 
       
-      <div v-if="showingPastAlgs">
-        <br>
-        <li v-for="(i, algs ) in pastAlgs" :key="algs">{{i}} <br><br> </li>
-        
+      <div v-if="showAnalysis">
+        <div v-if="showingList == 'algs'">
+          <h3>Most frequently appeared algorithms</h3>
+          <br>
+          <li v-for="(i, algs ) in pastAlgs" :key="algs">{{i}} <br><br> </li>
+        </div>
+        <div v-else>
+          <h3>List: {{ showingList }}</h3>
+          <br>
+          <li v-for="(i, fast ) in currentList" :key="fast">{{i.outcome}} <br><br> </li>
+        </div>
       </div>
 
       <div style="position: absolute; bottom: 20%;">
@@ -739,7 +751,8 @@ export default {
       ],
 
       pastAlgs: [],
-      showingPastAlgs: false,
+      showAnalysis: false,
+      showingList: '',
 
 
       results: [],
@@ -837,7 +850,9 @@ export default {
       showingTimer: '00:00',
       second: 0,
       minute: 0,
-      hours: 0, 
+      hours: 0,
+      
+      currentList: [],
 
 
       
@@ -1556,13 +1571,6 @@ export default {
     },
 
 
-
-    downTest(){
-      console.log('down')
-    },
-    upTest(){
-      console.log('up')
-    },
     addRandomData(num){
       console.log('getting random data')
       let randomNum = Math.random();
@@ -1706,6 +1714,77 @@ export default {
       }
 
     },
+
+    showList(name){
+      if(this.showAnalysis) return this.showAnalysis = false;
+      this.currentList = []
+      
+      if(name === "fast") {
+          // sort all results by outcome (fastest first)
+          const sorted = [...this.results].sort((a, b) => a.outcome - b.outcome);
+
+          
+          // take the top 50
+          const top50 = sorted.slice(0, 50);
+
+          // push into currentList with index
+          top50.forEach((item, idx) => {
+              this.currentList.push({ index: idx + 1, outcome: item.outcome });
+          });
+      }
+
+      if(name == "last"){
+        let i = 0;
+        let iii = this.results.length -1;
+        while(i < 50 && iii >=0){
+          this.currentList.push({index: iii +1, outcome: this.results[iii].outcome})
+          i++;
+          iii--;
+        }
+      }
+
+
+
+      
+      this.showingList = name
+      this.showAnalysis = true;
+
+    },
+
+    deleteFastest(){
+      // find fastest index
+      let fastestIndex = this.results
+            .map((r, i) => ({ time: r.outcome, index: i }))
+            .sort((a, b) => a.time - b.time)[0].index;
+
+      // confirm
+      let ok = confirm(
+            `Delete fastest record?\n` +
+            `Index: ${fastestIndex + 1}\n` +
+            `Time: ${this.results[fastestIndex].outcome}`
+      );
+      if(!ok) return;
+
+      // use your existing delete logic
+      this.deleteData(fastestIndex);
+    },
+
+    downloadResults() {
+        // convert to JSON string
+        const jsonStr = JSON.stringify(this.results, null, 4); // pretty print
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        // create temporary link to trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'results.json';
+        link.click();
+
+        // cleanup
+        URL.revokeObjectURL(url);
+    }
+
     
 
   },
