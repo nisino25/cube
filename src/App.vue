@@ -2546,22 +2546,16 @@ table td{
 }
 
 
-
-
-
-
-
-
-
-
-
 .random-algorithm{
   position: absolute;
   top: 40%;
   left: 0;
   right: 0;
   text-align: center;
-  color: red;
+  font-weight: bold;
+  /* color: red; */
+  color: #1a1a1a;
+
 }
 
 .shuffle{
@@ -2611,8 +2605,6 @@ table td{
   color:#E8E8E8 ;
   border: solid 1px grey;
 }
-
-
 
 
 
