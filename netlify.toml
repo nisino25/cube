@@ -3,8 +3,8 @@
   publish = "dist"
 
 [build.environment]
-  # webpack 4 (vue-cli 4) needs the legacy OpenSSL provider on Node 17+
-  NODE_OPTIONS = "--openssl-legacy-provider"
+  # vue-cli 4 / webpack 4 runs on Node 16 without OpenSSL workarounds
+  NODE_VERSION = "16"
   # npm 7+ strict peer resolution rejects the vue-cli 4 / vue2-frappe ranges;
   # yarn.lock installs cleanly, so have Netlify install with yarn
   NETLIFY_USE_YARN = "true"
