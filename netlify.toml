@@ -5,3 +5,5 @@
 [build.environment]
   # webpack 4 (vue-cli 4) needs the legacy OpenSSL provider on Node 17+
   NODE_OPTIONS = "--openssl-legacy-provider"
+  # older peer ranges (vue-cli 4, vue2-frappe) conflict under npm 7+ strict mode
+  NPM_FLAGS = "--legacy-peer-deps"
