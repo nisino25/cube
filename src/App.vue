@@ -9,7 +9,7 @@
 
     <template v-else>
       <header class="topbar">
-        <div class="brand"><span class="brand-mark"></span>Cube</div>
+        <div class="brand"><span class="brand-mark"></span>Cube<span v-if="userName" class="brand-user">· {{ userName }}</span></div>
         <div class="views"><i class="far fa-eye"></i> {{ userNum }}</div>
       </header>
 
@@ -156,15 +156,39 @@
 
           <section class="card">
             <div class="card-head">
-              <span class="label">Heatmap · 28 days</span>
+              <span class="label">Heatmap</span>
             </div>
-            <div class="heat">
-              <div v-for="(d, i) in labHeat" :key="i" class="heat-cell" :class="'lv' + d.level" :title="`${d.label}: ${d.count}`"></div>
+            <div class="seg heat-range">
+              <button v-for="o in heatOptions" :key="o.key" :class="{ active: heatRange === o.key }" @click="setHeatRange(o.key)">{{ o.label }}</button>
+            </div>
+            <div class="heat-scroll">
+              <div class="heat-months" :class="heatOption.days && heatOption.days <= 182 ? 'fit' : 'scroll'">
+                <span v-for="(m, c) in heatMonthLabels" :key="c">{{ m }}</span>
+              </div>
+              <div class="heat" :class="heatOption.days && heatOption.days <= 182 ? 'fit' : 'scroll'">
+                <template v-for="(d, i) in labHeat.cells" :key="i">
+                  <button
+                    v-if="d"
+                    class="heat-cell"
+                    :class="['lv' + d.level, { sel: heatSelected === d.date.toDateString() }]"
+                    :aria-label="`${d.date.toDateString()}: ${d.count} solves`"
+                    @click="heatSelected = d.date.toDateString()"
+                  ></button>
+                  <div v-else class="heat-cell pad"></div>
+                </template>
+              </div>
+            </div>
+            <div class="heat-picked">
+              <b>{{ heatPicked ? heatPicked.label : '' }}</b>
+              <span class="muted">{{ heatPicked ? heatPicked.count + (heatPicked.count === 1 ? ' solve' : ' solves') : 'Tap a day' }}</span>
             </div>
             <div class="heat-legend muted small">
-              Less
-              <span class="heat-cell lv0"></span><span class="heat-cell lv1"></span><span class="heat-cell lv2"></span><span class="heat-cell lv3"></span><span class="heat-cell lv4"></span>
-              More
+              <span>{{ labHeat.total }} solves · {{ labHeat.activeDays }} active days</span>
+              <span class="legend-scale">
+                Less
+                <span class="heat-cell lv0"></span><span class="heat-cell lv1"></span><span class="heat-cell lv2"></span><span class="heat-cell lv3"></span><span class="heat-cell lv4"></span>
+                More
+              </span>
             </div>
           </section>
 
@@ -356,6 +380,19 @@
       <!-- Settings -->
       <main v-else class="screen">
         <section class="card">
+          <div class="card-head"><span class="label">Profile</span></div>
+          <label class="name-field">
+            <span>Name</span>
+            <input type="text" class="input-field" v-model="userName" placeholder="Your name" maxlength="30" />
+          </label>
+          <div class="actions cloud-actions">
+            <button @click="saveCloud()"><i class="fas fa-cloud-upload-alt"></i> Save to cloud</button>
+            <button @click="loadCloud()"><i class="fas fa-cloud-download-alt"></i> Load from cloud</button>
+          </div>
+          <p class="muted small" v-if="cloudStatus">{{ cloudStatus }}</p>
+        </section>
+
+        <section class="card">
           <div class="card-head"><span class="label">Goals</span></div>
           <div class="form">
             <label><span>Session</span><input type="number" class="input-field" v-model="sessionGoal" /></label>
@@ -395,7 +432,8 @@ import SolveChart from './components/SolveChart.vue'
 import { OLL_CASES, PLL_CASES } from './data/study.js'
 import { loadJSON, saveJSON } from './utils/storage.js'
 import { UI_STYLES, COLOR_THEMES } from './data/styles.js'
-import { rollingAverage, bestOf, mean, stdDev, median, histogram, dailyCounts } from './utils/solveStats.js'
+import { playReady, playFinish } from './utils/sounds.js'
+import { rollingAverage, bestOf, mean, stdDev, median, histogram, dailyCounts, heatmapDays } from './utils/solveStats.js'
 
 // import Vue3autocounter from 'vue3-autocounter';
 import db from "./firebase.js"
@@ -423,6 +461,16 @@ export default {
       studyFamily: 'oll',
       studyCase: null,
       studyRevealed: false,
+      heatRange: 'm3',
+      heatSelected: new Date().toDateString(),
+      heatOptions: [
+        { key: 'm3', label: '3M', days: 91 },
+        { key: 'm6', label: '6M', days: 182 },
+        { key: 'm12', label: '12M', days: 365 },
+        { key: 'all', label: 'All', days: null },
+      ],
+      userName: loadJSON('cube-user', ''),
+      cloudStatus: '',
       uiStyle: loadJSON('cube-style-v2', 'zen'),
       uiStyles: UI_STYLES,
       uiColor: loadJSON('cube-color', 'sky'),
@@ -657,6 +705,39 @@ export default {
       }
       Object.entries(vars).forEach(([name, value]) => root.setProperty(name, value))
     },
+    saveCloud(silent = false){
+      const name = (this.userName || '').trim()
+      if (!name) {
+        if (!silent) this.cloudStatus = 'Enter a name first.'
+        return
+      }
+      this.cloudStatus = 'Saving…'
+      db.collection('cube-solves').doc(name).set({ name, results: this.results, updatedAt: Date.now() })
+        .then(() => { this.cloudStatus = `Saved ${this.results.length} solves for ${name}.` })
+        .catch(e => { this.cloudStatus = `Save failed: ${e.message}` })
+    },
+    loadCloud(){
+      const name = (this.userName || '').trim()
+      if (!name) {
+        this.cloudStatus = 'Enter a name first.'
+        return
+      }
+      if (!confirm(`Replace the solves on this device with the cloud copy for "${name}"?`)) return
+      this.cloudStatus = 'Loading…'
+      db.collection('cube-solves').doc(name).get()
+        .then(doc => {
+          if (!doc.exists) {
+            this.cloudStatus = `No cloud save for ${name} yet.`
+            return
+          }
+          this.results = doc.data().results || []
+          localStorage.results = JSON.stringify(this.results)
+          this.totalCount = this.results.length
+          this.getTheBest()
+          this.cloudStatus = `Loaded ${this.results.length} solves for ${name}.`
+        })
+        .catch(e => { this.cloudStatus = `Load failed: ${e.message}` })
+    },
     setFamily(family){
       this.studyFamily = family
       this.studyCase = null
@@ -675,6 +756,13 @@ export default {
       } else {
         this.studyLearned[key] = true
       }
+    },
+    setHeatRange(key){
+      this.heatRange = key
+      this.$nextTick(() => {
+        const el = document.querySelector('.heat-scroll')
+        if (el) el.scrollLeft = el.scrollWidth
+      })
     },
     selectCase(id){
       this.studyCase = id
@@ -699,6 +787,7 @@ export default {
         if(this.pressing){
         console.log('ready to start timer')
         this.isTimerRunning = true
+        if(this.soundOn) playReady()
       }else{
         console.log('not longe nough')
         this.isTimerRunning = false
@@ -900,6 +989,8 @@ export default {
         clearInterval(this.started);
         
         this.results.push({time: Date.now(),outcome: Number(this.time) });
+        if(this.soundOn) playFinish(Number(this.time))
+        if(this.userName && this.results.length % 10 === 0) this.saveCloud(true)
         // this.currentTime = null
 
         this.sessionCount++;
@@ -1177,6 +1268,7 @@ export default {
       },
     },
     holdDelay(v){ saveJSON('cube-hold', v) },
+    userName(v){ saveJSON('cube-user', v) },
     soundOn(v){ saveJSON('cube-sound', v) },
     menu: {
       immediate: true,
@@ -1268,13 +1360,42 @@ export default {
       const pct = this.studyCases.length ? this.studyLearnedCount / this.studyCases.length : 0
       return { dash: circ, offset: circ * (1 - pct) }
     },
+    heatOption(){
+      return this.heatOptions.find(o => o.key === this.heatRange) || this.heatOptions[0]
+    },
+    heatMonthLabels(){
+      const cells = this.labHeat.cells
+      const cols = Math.ceil(cells.length / 7)
+      const labels = []
+      let last = null
+      for (let c = 0; c < cols; c++) {
+        const first = cells.slice(c * 7, c * 7 + 7).find(d => d)
+        if (!first) { labels.push(''); continue }
+        const month = first.date.getMonth()
+        labels.push(month !== last ? first.date.toLocaleString('en-US', { month: 'short' }) : '')
+        last = month
+      }
+      return labels
+    },
+    heatPicked(){
+      const key = this.heatSelected
+      const day = this.labHeat.cells.find(d => d && d.date.toDateString() === key)
+      if (!day) return null
+      return { ...day, label: day.date.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) }
+    },
     labHeat(){
-      const days = dailyCounts(this.results, 28)
-      const max = Math.max(1, ...days.map(d => d.count))
-      return days.map(d => ({
-        ...d,
-        level: d.count === 0 ? 0 : Math.min(4, Math.ceil((d.count / max) * 4)),
-      }))
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      let start
+      if (this.heatOption.days) {
+        start = new Date(today)
+        start.setDate(today.getDate() - (this.heatOption.days - 1))
+      } else {
+        const first = this.results.length ? Math.min(...this.results.map(r => r.time)) : Date.now()
+        start = new Date(first)
+        start.setHours(0, 0, 0, 0)
+      }
+      return heatmapDays(this.results, start, today)
     },
     studyCases(){
       return this.studyFamily === 'oll' ? OLL_CASES : PLL_CASES
@@ -1580,6 +1701,7 @@ export default {
 
 html,
 body {
+  touch-action: manipulation;
   margin: 0;
   padding: 0;
   background: var(--bg);
@@ -2485,4 +2607,68 @@ html.timer-locked .timer-screen { touch-action: none; }
 .parts summary { cursor: pointer; font-size: 0.85rem; color: var(--text-muted); list-style: none; }
 .parts summary::-webkit-details-marker { display: none; }
 .parts[open] summary { margin-bottom: 10px; }
+
+/* Heatmap: 3M/6M fit the card, longer ranges scroll */
+.heat-range { margin-bottom: 10px; }
+.heat-scroll { overflow-x: auto; padding-bottom: 4px; }
+.heat.fit {
+  display: grid;
+  grid-template-rows: repeat(7, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: none;
+  gap: 3px;
+}
+.heat.scroll {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  grid-auto-flow: column;
+  grid-auto-columns: 12px;
+  grid-template-columns: none;
+  gap: 3px;
+  width: max-content;
+}
+.heat.scroll .heat-cell { width: 12px; height: 12px; aspect-ratio: auto; border-radius: 3px; }
+.heat-cell.pad { background: transparent; }
+.heat-legend { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; margin-top: 10px; }
+.legend-scale { display: inline-flex; align-items: center; gap: 4px; }
+.legend-scale .heat-cell { width: 12px; height: 12px; aspect-ratio: auto; border-radius: 3px; }
+/* Profile */
+.name-field { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0 12px; }
+.name-field span { color: var(--text-muted); }
+.name-field .input-field { width: 60%; text-align: right; }
+.cloud-actions { margin-top: 4px; }
+.cloud-actions button { flex: 1; justify-content: center; }
+.brand-user { color: var(--text-muted); font-weight: 500; margin-left: 4px; font-size: 0.9rem; }
+
+/* Heatmap labels and picked day */
+.heat-months {
+  display: grid;
+  grid-auto-flow: column;
+  height: 14px;
+  margin-bottom: 4px;
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.heat-months.fit { grid-auto-columns: minmax(0, 1fr); gap: 3px; }
+.heat-months.scroll { grid-auto-columns: 12px; gap: 3px; width: max-content; }
+.heat-months span { overflow: visible; }
+.heat-cell {
+  padding: 0;
+  min-height: 0;
+  border: none;
+  border-radius: 3px;
+}
+.heat-cell.sel { outline: 2px solid var(--text); outline-offset: 1px; }
+.heat-picked {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.heat-picked b { font-weight: 600; }
 </style>

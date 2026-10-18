@@ -81,3 +81,28 @@ export function dailyCounts(results, days = 14) {
   }
   return out
 }
+
+// Day cells for the heatmap, from `start` to `end` inclusive, padded at the front so the
+// first column starts on a Sunday. Each real day has a `level` 0-4 relative to the busiest day.
+export function heatmapDays(results, start, end) {
+  const counts = new Map()
+  for (const r of results) {
+    const key = new Date(r.time).toDateString()
+    counts.set(key, (counts.get(key) || 0) + 1)
+  }
+  const days = []
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    days.push({ date: new Date(d), count: counts.get(d.toDateString()) || 0 })
+  }
+  const max = Math.max(1, ...days.map((d) => d.count))
+  const cells = days.map((d) => ({
+    ...d,
+    level: d.count === 0 ? 0 : Math.min(4, Math.ceil((d.count / max) * 4)),
+  }))
+  const lead = new Array(new Date(start).getDay()).fill(null)
+  return {
+    cells: [...lead, ...cells],
+    total: days.reduce((sum, d) => sum + d.count, 0),
+    activeDays: days.filter((d) => d.count > 0).length,
+  }
+}
