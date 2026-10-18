@@ -48,13 +48,14 @@
         <section class="strip" v-if="results.length > 0 && (display.recent || display.aoLine)">
           <div class="chips" v-if="display.recent">
             <div v-for="k in recentIdx" :key="k" class="chip" :class="{ latest: k === results.length - 1 }">
-              <span class="chip-no">{{ k + 1 }}</span>{{ outcomes[k] }}
+              <span class="chip-no">{{ k + 1 }}</span>{{ outcomes[k] }}<span v-if="results[k].plus2" class="plus-tag">+2</span>
             </div>
           </div>
           <div class="stats-line" v-if="display.aoLine">
             <span>AO5 <b>{{ AO5Data[results.length - 1] ?? '—' }}</b></span>
             <span>AO12 <b>{{ AO12Data[results.length - 1] ?? '—' }}</b></span>
             <span>Best <b>{{ bestTime }}</b></span>
+            <button class="plus2-btn" :class="{ on: results[results.length - 1].plus2 }" title="Add 2 seconds to the last solve" @click="togglePlus2(results.length - 1)">+2</button>
             <button class="icon-btn" title="Delete last solve" @click="deleteData(results.length - 1)"><i class="fas fa-undo"></i></button>
           </div>
         </section>
@@ -762,6 +763,19 @@ export default {
           this.cloudStatus = `Loaded ${this.results.length} solves for ${name}.`
         })
         .catch(e => { this.cloudStatus = `Load failed: ${e.message}` })
+    },
+    togglePlus2(k){
+      const r = this.results[k]
+      if (!r) return
+      if (r.plus2) {
+        r.outcome = Number((r.outcome - 2).toFixed(2))
+        r.plus2 = false
+      } else {
+        r.outcome = Number((r.outcome + 2).toFixed(2))
+        r.plus2 = true
+      }
+      localStorage.results = JSON.stringify(this.results)
+      this.getTheBest()
     },
     setFamily(family){
       this.studyFamily = family
@@ -2696,4 +2710,16 @@ html.timer-locked .timer-screen { touch-action: none; }
   font-variant-numeric: tabular-nums;
 }
 .heat-picked b { font-weight: 600; }
+
+/* +2 penalty */
+.plus2-btn {
+  min-height: 0;
+  padding: 3px 9px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 999px;
+}
+.plus2-btn.on { color: var(--accent-ink); background: var(--warn); border-color: var(--warn); }
+.plus-tag { margin-left: 3px; font-size: 0.65rem; color: var(--warn); font-weight: 600; }
 </style>
