@@ -712,7 +712,24 @@ export default {
         return
       }
       this.cloudStatus = 'Saving…'
-      db.collection('cube-solves').doc(name).set({ name, results: this.results, updatedAt: Date.now() })
+      // Firestore caps one document at ~1 MB, so solves are split into chunks of 5,000.
+      const chunkSize = 5000
+      const chunks = []
+      for (let i = 0; i < this.results.length; i += chunkSize) {
+        chunks.push(this.results.slice(i, i + chunkSize))
+      }
+      const batch = db.batch()
+      chunks.forEach((results, i) => {
+        batch.set(db.collection('cube-solve-chunks').doc(`${name}__${i}`), { results })
+      })
+      batch.set(db.collection('cube-solves').doc(name), {
+        name,
+        count: this.results.length,
+        chunkSize,
+        chunks: chunks.length,
+        updatedAt: Date.now(),
+      })
+      batch.commit()
         .then(() => { this.cloudStatus = `Saved ${this.results.length} solves for ${name}.` })
         .catch(e => { this.cloudStatus = `Save failed: ${e.message}` })
     },
@@ -725,12 +742,20 @@ export default {
       if (!confirm(`Replace the solves on this device with the cloud copy for "${name}"?`)) return
       this.cloudStatus = 'Loading…'
       db.collection('cube-solves').doc(name).get()
-        .then(doc => {
+        .then(async doc => {
           if (!doc.exists) {
             this.cloudStatus = `No cloud save for ${name} yet.`
             return
           }
-          this.results = doc.data().results || []
+          const data = doc.data()
+          let results = data.results || []
+          if (data.chunks) {
+            const parts = await Promise.all(
+              Array.from({ length: data.chunks }, (_, i) => db.collection('cube-solve-chunks').doc(`${name}__${i}`).get())
+            )
+            results = parts.flatMap(part => part.data().results)
+          }
+          this.results = results
           localStorage.results = JSON.stringify(this.results)
           this.totalCount = this.results.length
           this.getTheBest()
