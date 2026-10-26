@@ -311,9 +311,15 @@
       <main v-else-if="menu === 'study'" class="screen lab">
         <header class="lab-hero">
           <div class="lab-kicker">Study</div>
-          <div class="lab-title">Flashcards</div>
+          <div class="lab-title">Study</div>
         </header>
 
+        <div class="seg wide study-switch">
+          <button :class="{ active: studyPage === 'blind' }" @click="studyPage = 'blind'">Letters</button>
+          <button :class="{ active: studyPage === 'oll' }" @click="studyPage = 'oll'">OLL / PLL</button>
+        </div>
+        <blind-trainer v-if="studyPage === 'blind'" />
+        <template v-else>
           <section class="study-head">
             <div class="ring-mini">
               <svg viewBox="0 0 80 80">
@@ -369,13 +375,7 @@
             >{{ shortName(c) }}</button>
           </section>
 
-          <section class="card blind">
-            <div class="card-head">
-              <span class="label">Blind mode</span>
-              <span class="badge">Coming soon</span>
-            </div>
-            <p class="muted small">Solve from a memorised scramble with the timer hidden. Not built yet.</p>
-          </section>
+        </template>
       </main>
 
       <!-- Settings -->
@@ -408,6 +408,7 @@
           <div class="action-rows">
             <button class="row-btn" @click="downloadResults()"><i class="fas fa-file-export"></i> Export JSON</button>
             <button class="row-btn" @click="deleteFastest()"><i class="fas fa-trash-alt"></i> Delete fastest solve</button>
+            <button class="row-btn" @click="deleteSlowest()"><i class="fas fa-trash-alt"></i> Delete slowest solve</button>
             <button class="row-btn danger" @click="clearTheLocal()"><i class="fas fa-exclamation-triangle"></i> Clear all solves</button>
           </div>
         </section>
@@ -434,6 +435,8 @@ import { OLL_CASES, PLL_CASES } from './data/study.js'
 import { loadJSON, saveJSON } from './utils/storage.js'
 import { UI_STYLES, COLOR_THEMES } from './data/styles.js'
 import { playReady, playFinish } from './utils/sounds.js'
+import { randomScramble, computeMemo } from './utils/blind.js'
+import BlindTrainer from './components/BlindTrainer.vue'
 import { rollingAverage, bestOf, mean, stdDev, median, histogram, dailyCounts, heatmapDays } from './utils/solveStats.js'
 
 // import Vue3autocounter from 'vue3-autocounter';
@@ -442,6 +445,7 @@ import db from "./firebase.js"
 export default {
   components: {
     SolveChart,
+    BlindTrainer,
   },
   
 
@@ -463,6 +467,10 @@ export default {
       studyCase: null,
       studyRevealed: false,
       heatRange: 'm3',
+      studyPage: 'blind',
+      blindScramble: '',
+      blindMemo: { edges: '', corners: '' },
+      blindShow: false,
       heatSelected: new Date().toDateString(),
       heatOptions: [
         { key: 'm3', label: '3M', days: 91 },
@@ -776,6 +784,14 @@ export default {
       }
       localStorage.results = JSON.stringify(this.results)
       this.getTheBest()
+    },
+    newBlind(){
+      this.blindScramble = randomScramble(20)
+      this.blindMemo = computeMemo(this.blindScramble)
+      this.blindShow = false
+    },
+    blindPairs(letters){
+      return letters.match(/.{1,2}/g) || []
     },
     setFamily(family){
       this.studyFamily = family
@@ -1185,6 +1201,20 @@ export default {
 
     },
 
+    deleteSlowest(){
+      if (this.results.length === 0) return
+      let slowestIndex = 0
+      this.results.forEach((r, i) => {
+        if (r.outcome > this.results[slowestIndex].outcome) slowestIndex = i
+      })
+      const ok = confirm(
+            `Delete slowest record?\n` +
+            `Index: ${slowestIndex + 1}\n` +
+            `Time: ${this.results[slowestIndex].outcome}`
+      )
+      if (!ok) return
+      this.deleteData(slowestIndex)
+    },
     deleteFastest(){
       // find fastest index
       let fastestIndex = this.results
@@ -2722,4 +2752,24 @@ html.timer-locked .timer-screen { touch-action: none; }
 }
 .plus2-btn.on { color: var(--accent-ink); background: var(--warn); border-color: var(--warn); }
 .plus-tag { margin-left: 3px; font-size: 0.65rem; color: var(--warn); font-weight: 600; }
+
+/* Blind */
+.scramble-text {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  word-spacing: 3px;
+}
+.memo-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--grid);
+}
+.memo-row:last-child { border-bottom: none; }
+.memo-letters { font-family: var(--mono); font-size: 1rem; letter-spacing: 0.08em; text-align: right; }
+.blind-note { padding: 0 4px; }
 </style>
