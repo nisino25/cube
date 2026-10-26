@@ -1213,7 +1213,7 @@ export default {
             `Time: ${this.results[slowestIndex].outcome}`
       )
       if (!ok) return
-      this.deleteData(slowestIndex)
+      this.removeAt(slowestIndex)
     },
     deleteFastest(){
       // find fastest index
@@ -1228,9 +1228,18 @@ export default {
             `Time: ${this.results[fastestIndex].outcome}`
       );
       if(!ok) return;
-
-      // use your existing delete logic
-      this.deleteData(fastestIndex);
+      this.removeAt(fastestIndex);
+    },
+    deleteData(num){
+      const ok = confirm(`Delete No.${num + 1} (${this.results[num].outcome}s)?`)
+      if (!ok) return
+      this.removeAt(num)
+    },
+    removeAt(num){
+      this.results.splice(num, 1)
+      this.totalCount = this.results.length
+      localStorage.results = JSON.stringify(this.results)
+      this.getTheBest()
     },
 
     downloadResults() {
