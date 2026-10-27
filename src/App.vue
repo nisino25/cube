@@ -10,11 +10,31 @@
     <template v-else>
       <header class="topbar">
         <div class="brand"><span class="brand-mark"></span>Cube<span v-if="userName" class="brand-user">· {{ userName }}</span></div>
-        <div class="views"><i class="far fa-eye"></i> {{ userNum }}</div>
+        <div class="top-right">
+          <button class="sound-btn" :title="soundOn ? 'Sound on' : 'Sound off'" :aria-label="soundOn ? 'Turn sound off' : 'Turn sound on'" @click="soundOn = !soundOn">
+            <i :class="soundOn ? 'fas fa-volume-up' : 'fas fa-volume-mute'"></i>
+          </button>
+          <div class="views"><i class="far fa-eye"></i> {{ userNum }}</div>
+        </div>
       </header>
 
       <!-- Timer -->
       <main v-if="menu === 'timer'" class="screen timer-screen">
+        <section class="strip" v-if="results.length > 0 && (display.recent || display.aoLine)">
+          <div class="chips" v-if="display.recent">
+            <div v-for="k in recentIdx" :key="k" class="chip" :class="{ latest: k === results.length - 1 }">
+              <span class="chip-no">{{ k + 1 }}</span>{{ outcomes[k] }}<span v-if="results[k].plus2" class="plus-tag">+2</span>
+            </div>
+          </div>
+          <div class="stats-line" v-if="display.aoLine">
+            <span>AO5 <b>{{ AO5Data[results.length - 1] ?? '—' }}</b></span>
+            <span>AO12 <b>{{ AO12Data[results.length - 1] ?? '—' }}</b></span>
+            <span>Best <b>{{ bestTime }}</b></span>
+            <button class="plus2-btn" :class="{ on: results[results.length - 1].plus2 }" title="Add 2 seconds to the last solve" @click="togglePlus2(results.length - 1)">+2</button>
+            <button class="icon-btn" title="Delete last solve" @click="deleteData(results.length - 1)"><i class="fas fa-undo"></i></button>
+          </div>
+        </section>
+
         <section class="card scramble-card" v-if="display.scramble">
           <div class="card-head">
             <span class="label">Scramble</span>
@@ -43,21 +63,6 @@
           <span class="clock-hint">
             {{ isTimerRunning ? 'Release to start' : pressing ? 'Keep holding…' : 'Hold to get ready' }}
           </span>
-        </section>
-
-        <section class="strip" v-if="results.length > 0 && (display.recent || display.aoLine)">
-          <div class="chips" v-if="display.recent">
-            <div v-for="k in recentIdx" :key="k" class="chip" :class="{ latest: k === results.length - 1 }">
-              <span class="chip-no">{{ k + 1 }}</span>{{ outcomes[k] }}<span v-if="results[k].plus2" class="plus-tag">+2</span>
-            </div>
-          </div>
-          <div class="stats-line" v-if="display.aoLine">
-            <span>AO5 <b>{{ AO5Data[results.length - 1] ?? '—' }}</b></span>
-            <span>AO12 <b>{{ AO12Data[results.length - 1] ?? '—' }}</b></span>
-            <span>Best <b>{{ bestTime }}</b></span>
-            <button class="plus2-btn" :class="{ on: results[results.length - 1].plus2 }" title="Add 2 seconds to the last solve" @click="togglePlus2(results.length - 1)">+2</button>
-            <button class="icon-btn" title="Delete last solve" @click="deleteData(results.length - 1)"><i class="fas fa-undo"></i></button>
-          </div>
         </section>
 
         <section class="rings" v-if="display.rings">
@@ -2012,7 +2017,7 @@ button.danger { color: var(--danger); }
 }
 .clock-hint {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 1.15rem;
 }
 
 /* Recent solves */
@@ -2781,4 +2786,21 @@ html.timer-locked .timer-screen { touch-action: none; }
 .memo-row:last-child { border-bottom: none; }
 .memo-letters { font-family: var(--mono); font-size: 1rem; letter-spacing: 0.08em; text-align: right; }
 .blind-note { padding: 0 4px; }
+
+/* Top bar right side: sound toggle and view count */
+.top-right { display: flex; align-items: center; gap: 12px; }
+.sound-btn {
+  min-height: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: transparent;
+  border-color: transparent;
+}
+.sound-btn i { font-size: 0.95rem; }
 </style>
