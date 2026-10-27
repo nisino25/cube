@@ -35,10 +35,17 @@
           </div>
         </section>
 
-        <section class="card scramble-card" v-if="display.scramble">
+        <section
+          class="card scramble-card"
+          v-if="display.scramble"
+          @pointerdown="startTimer()"
+          @pointerup="stopTimer()"
+          @pointercancel="stopTimer()"
+          @pointerleave="stopTimer()"
+        >
           <div class="card-head">
             <span class="label">Scramble</span>
-            <button class="ghost small-btn" @click="algShuffle()"><i class="fas fa-sync-alt"></i> New</button>
+            <button class="ghost small-btn" @pointerdown.stop @click="algShuffle()"><i class="fas fa-sync-alt"></i> New</button>
           </div>
           <div class="scramble">
             <div v-for="(row, r) in scrambleRows" :key="r" class="scramble-row">
@@ -2062,7 +2069,7 @@ button.danger { color: var(--danger); }
   gap: 6px;
 }
 .ring { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.ring-dial { position: relative; width: 60px; height: 60px; }
+.ring-dial { position: relative; width: min(84px, 21vw); height: min(84px, 21vw); }
 .ring-dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .ring-track { fill: none; stroke: var(--border); stroke-width: 6; }
 .ring-value {
@@ -2803,4 +2810,18 @@ html.timer-locked .timer-screen { touch-action: none; }
   border-color: transparent;
 }
 .sound-btn i { font-size: 0.95rem; }
+
+/* Keep the timer app from selecting text or showing the long-press menu */
+.app,
+.app * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.app input,
+.app textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+.ring-num { white-space: nowrap; }
 </style>
